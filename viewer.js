@@ -47,8 +47,19 @@ const I18N = {
 class MeasurementViewer {
     constructor() {
         const urlParams = new URLSearchParams(window.location.search);
-        this.objPath = urlParams.get('obj');
-        this.jsonPath = urlParams.get('json');
+        
+        // Nouvelle logique : on récupère juste le nom du modèle
+        const modelName = urlParams.get('model');
+        
+        if (modelName) {
+            this.objPath = `models/${modelName}.obj`;
+            this.jsonPath = `measurements/${modelName}.json`;
+        } else {
+            // Rétrocompatibilité ou sécurité si l'URL utilise encore obj=... et json=...
+            this.objPath = urlParams.get('obj');
+            this.jsonPath = urlParams.get('json');
+        }
+
         this.lang = urlParams.get('lang') || 'fr';
         this.theme = urlParams.get('theme') || 'dark';
 
