@@ -129,22 +129,73 @@ class MeasurementViewer {
         this.setupEvents();
         this.setupSliderEvents();
 
+        const loadData = async (obj, json) => {
+            await this.loadAvatar(obj);
+            await this.loadMeasurements(json);
+        };
+
         try {
-            if (!this.objPath || !this.jsonPath) throw new Error(this.t('missingPaths'));
-
-            await this.loadAvatar(this.objPath);
-            await this.loadMeasurements(this.jsonPath);
-
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.display = 'none', 500);
-            }
-            this.animate();
+            if (!this.objPath || !this.jsonPath) throw new Error("Chemins manquants");
+            await loadData(this.objPath, this.jsonPath);
         } catch (error) {
-            const errEl = document.getElementById('loading-text');
-            if (errEl) errEl.textContent = this.t('errorPrefix') + error.message;
+            console.warn("Échec du modèle demandé, tentative de chargement du modèle par défaut...", error);
+            this.showToast("Modèle introuvable. Chargement du modèle par défaut...", true);
+            
+            // Nettoyage de la scène au cas où l'OBJ a chargé mais que le JSON a crashé
+            const toRemove = [...this.avatarGroup.children, ...this.measurementsGroup.children];
+            toRemove.forEach(c => {
+                if (c.geometry) c.geometry.dispose();
+                if (c.material) {
+                    if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                    else c.material.dispose();
+                }
+                c.parent.remove(c);
+            });
+            this.activeMeasurements = [];
+            this.legendContent.innerHTML = '';
+
+            try {
+                // Remplacer par le chemin de ton vrai modèle par défaut
+                await loadData('models/average_man_182.obj', 'measurements/average_man_182.json');
+            } catch (fallbackError) {
+                const errEl = document.getElementById('loading-text');
+                if (errEl) errEl.textContent = "Erreur critique : Modèle par défaut introuvable.";
+                return;
+            }
         }
+
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+        }
+        this.animate();
+    }
+
+    showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.style.position = 'absolute';
+        toast.style.top = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.padding = '12px 24px';
+        toast.style.background = isError ? 'rgba(220, 53, 69, 0.95)' : 'rgba(78, 168, 222, 0.95)';
+        toast.style.color = '#fff';
+        toast.style.borderRadius = '8px';
+        toast.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+        toast.style.fontSize = '14px';
+        toast.style.fontWeight = 'bold';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        toast.style.backdropFilter = 'blur(10px)';
+        toast.style.transition = 'opacity 0.3s ease-in-out';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000); // Disparaît après 3 secondes
     }
 
     applyTheme() {
@@ -920,10 +971,12 @@ class MeasurementViewer {
                     
                     setTimeout(() => {
                         if (controlsVisible && !this.controlsPanel.classList.contains('hidden')) {
+                            // Si les sliders sont là, on place la description juste au-dessus
                             const rect = this.controlsPanel.getBoundingClientRect();
                             const offset = window.innerHeight - rect.top + 15; 
                             this.descPanel.style.bottom = `${offset}px`;
                         } else {
+                            // Sinon, elle retourne tout en bas
                             this.descPanel.style.bottom = '20px';
                         }
                     }, 10);
