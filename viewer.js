@@ -94,6 +94,7 @@ class MeasurementViewer {
         this.descPanel.style.backdropFilter = 'blur(10px)';
         this.descPanel.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
         this.descPanel.style.transition = 'bottom 0.2s ease-out';
+        this.descPanel.style.display = 'none';
         
         this.descPanel.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
