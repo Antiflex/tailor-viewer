@@ -1,4 +1,3 @@
-// viewer.js (Version Production)
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -20,27 +19,7 @@ const I18N = {
         originalTag: "Original",
         cloneTag: "Clone symétrique",
         defaultMarkerTooltip: "Valeur par défaut",
-        customMarkerTooltip: "Marqueur perso",
-        rightClickDelete: "Clic droit pour supprimer"
-    },
-    en: {
-        loading: "Loading model...",
-        errorPrefix: "Error: ",
-        missingPaths: "Missing model or data.",
-        cannotReadJson: "Unable to read results.json",
-        heightLabel: "Height",
-        changeColorTooltip: "Change color",
-        toggleGroupTooltip: "Show / Hide group",
-        toggleSingleTooltip: "Show / Hide measurement",
-        leftShort: "L",
-        rightShort: "R",
-        leftTitle: "Left Side",
-        rightTitle: "Right Side",
-        originalTag: "Original",
-        cloneTag: "Symmetric clone",
-        defaultMarkerTooltip: "Default value",
-        customMarkerTooltip: "Custom marker",
-        rightClickDelete: "Right-click to delete"
+        customMarkerTooltip: "Marqueur perso"
     }
 };
 
@@ -48,14 +27,11 @@ class MeasurementViewer {
     constructor() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Nouvelle logique : on récupère juste le nom du modèle
         const modelName = urlParams.get('model');
-        
         if (modelName) {
             this.objPath = `models/${modelName}.obj`;
             this.jsonPath = `measurements/${modelName}.json`;
         } else {
-            // Rétrocompatibilité ou sécurité si l'URL utilise encore obj=... et json=...
             this.objPath = urlParams.get('obj');
             this.jsonPath = urlParams.get('json');
         }
@@ -80,6 +56,7 @@ class MeasurementViewer {
         this.descPanel = document.createElement('div');
         this.descPanel.id = 'description-panel';
         this.descPanel.className = 'hidden';
+        this.descPanel.style.display = 'none'; // CORRECTION : Caché au démarrage
         this.descPanel.style.position = 'absolute';
         this.descPanel.style.bottom = '20px';
         this.descPanel.style.left = '20px';
@@ -94,7 +71,6 @@ class MeasurementViewer {
         this.descPanel.style.backdropFilter = 'blur(10px)';
         this.descPanel.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
         this.descPanel.style.transition = 'bottom 0.2s ease-out';
-        this.descPanel.style.display = 'none';
         
         this.descPanel.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
@@ -142,7 +118,6 @@ class MeasurementViewer {
             console.warn("Échec du modèle demandé, tentative de chargement du modèle par défaut...", error);
             this.showToast("Modèle introuvable. Chargement du modèle par défaut...", true);
             
-            // Nettoyage de la scène au cas où l'OBJ a chargé mais que le JSON a crashé
             const toRemove = [...this.avatarGroup.children, ...this.measurementsGroup.children];
             toRemove.forEach(c => {
                 if (c.geometry) c.geometry.dispose();
@@ -156,7 +131,6 @@ class MeasurementViewer {
             this.legendContent.innerHTML = '';
 
             try {
-                // Remplacer par le chemin de ton vrai modèle par défaut
                 await loadData('models/average_man_182.obj', 'measurements/average_man_182.json');
             } catch (fallbackError) {
                 const errEl = document.getElementById('loading-text');
@@ -196,7 +170,7 @@ class MeasurementViewer {
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
-        }, 3000); // Disparaît après 3 secondes
+        }, 3000);
     }
 
     applyTheme() {
@@ -453,11 +427,20 @@ class MeasurementViewer {
         if (data.type === 'plumb' || data.type === 'caliper') hexColor = 0xcc33ff;
         const cssColor = '#' + hexColor.toString(16).padStart(6, '0');
         
-        let isClosed = false;
+        // CORRECTION : Détection intelligente des boucles fermées sans template
+        let isClosed = data.is_closed_loop === true || data.is_closed === true;
         if (data.type === 'slicer') isClosed = true;
-        if (points.length > 2 && points[0].distanceTo(points[points.length - 1]) < 0.005) {
-            isClosed = true;
-            points.pop(); 
+        
+        if (points.length > 2) {
+            const dist = points[0].distanceTo(points[points.length - 1]);
+            // Si le début et la fin sont très proches (moins de 4 cm), c'est une boucle (tape ou slicer)
+            if (dist < 0.04) {
+                isClosed = true;
+            }
+            // Retirer le dernier point s'il chevauche le premier pour éviter l'artefact graphique du CatmullRom
+            if (isClosed && dist < 0.02) {
+                points.pop(); 
+            }
         }
 
         const curve = new THREE.CatmullRomCurve3(points, isClosed, 'catmullrom', 0);
@@ -908,6 +891,9 @@ class MeasurementViewer {
             if (targetObj.gridEngine) {
                 this.controlsPanel.classList.remove('hidden');
                 this.configureSlidersRange(targetObj);
+                
+                // CORRECTION : Appel à la génération des marqueurs graphiques
+                this.renderMarkers(targetObj);
 
                 const curT = targetObj.currentT !== undefined ? targetObj.currentT : targetObj.rawData.default_t;
                 const curTh = targetObj.currentTheta !== undefined ? targetObj.currentTheta : targetObj.rawData.default_theta;
@@ -972,12 +958,10 @@ class MeasurementViewer {
                     
                     setTimeout(() => {
                         if (controlsVisible && !this.controlsPanel.classList.contains('hidden')) {
-                            // Si les sliders sont là, on place la description juste au-dessus
                             const rect = this.controlsPanel.getBoundingClientRect();
                             const offset = window.innerHeight - rect.top + 15; 
                             this.descPanel.style.bottom = `${offset}px`;
                         } else {
-                            // Sinon, elle retourne tout en bas
                             this.descPanel.style.bottom = '20px';
                         }
                     }, 10);
@@ -1053,7 +1037,8 @@ class MeasurementViewer {
             t_arr, th_arr, ph_arr,
             minT: t_arr[0], maxT: t_arr[t_arr.length-1],
             minTh, maxTh,
-            minPh, maxPh
+            minPh, maxPh,
+            customMarkers: data.customMarkers || [] // Gère les marqueurs customs s'ils sont dans le JSON
         };
     }
 
@@ -1148,10 +1133,20 @@ class MeasurementViewer {
         }
 
         const points = result.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
-        const curve = new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0);
         
-        const newGeo = new THREE.TubeGeometry(curve, points.length * 4, 0.0035, 8, true);
-        const newHalo = new THREE.TubeGeometry(curve, points.length * 4, 0.007, 8, true);
+        // CORRECTION : S'assurer que le tube interpolé se referme s'il le faut
+        let isClosed = item.rawData.is_closed_loop === true || item.rawData.is_closed === true;
+        if (item.rawData.type === 'slicer') isClosed = true;
+        if (points.length > 2) {
+            const dist = points[0].distanceTo(points[points.length - 1]);
+            if (dist < 0.04) isClosed = true;
+            if (isClosed && dist < 0.02) points.pop();
+        }
+
+        const curve = new THREE.CatmullRomCurve3(points, isClosed, 'catmullrom', 0);
+        
+        const newGeo = new THREE.TubeGeometry(curve, points.length * 4, 0.0035, 8, isClosed);
+        const newHalo = new THREE.TubeGeometry(curve, points.length * 4, 0.007, 8, isClosed);
         
         item.tube.geometry.dispose();
         item.halo.geometry.dispose();
@@ -1188,6 +1183,69 @@ class MeasurementViewer {
         this.sliderPhi.value = item.rawData.default_phi;
 
         this.sliderT.dispatchEvent(new Event('input'));
+    }
+
+    // CORRECTION : Remise en place de la fonction pour afficher les petits traits sur les sliders
+    renderMarkers(item) {
+        if (!item.gridEngine) return;
+        const eng = item.gridEngine;
+
+        const toPercent = (val, min, max) => {
+            if (Math.abs(max - min) < 1e-6) return 50;
+            return ((val - min) / (max - min)) * 100;
+        };
+
+        ['t', 'theta', 'phi'].forEach(axis => {
+            const container = document.getElementById(`markers-container-${axis}`);
+            if (!container) return;
+            container.innerHTML = '';
+
+            const isVert = axis === 't';
+            const className = isVert ? 'vertical-m' : 'horizontal-m';
+            const styleProp = isVert ? 'bottom' : 'left';
+
+            let defVal = 0, minV = 0, maxV = 1;
+            if (axis === 't') { defVal = item.rawData.default_t; minV = eng.minT; maxV = eng.maxT; }
+            if (axis === 'theta') { defVal = item.rawData.default_theta; minV = eng.minTh; maxV = eng.maxTh; }
+            if (axis === 'phi') { defVal = item.rawData.default_phi; minV = eng.minPh; maxV = eng.maxPh; }
+            
+            const defPct = toPercent(defVal, minV, maxV);
+            const defMarker = document.createElement('div');
+            defMarker.className = `marker default-marker ${className}`;
+            defMarker.style[styleProp] = `${defPct}%`;
+            defMarker.title = `${this.t('defaultMarkerTooltip')} (${defVal})`;
+            
+            defMarker.addEventListener('click', () => {
+                if (axis === 't') this.sliderT.value = defVal;
+                if (axis === 'theta') this.sliderTheta.value = defVal;
+                if (axis === 'phi') this.sliderPhi.value = defVal;
+                this.sliderT.dispatchEvent(new Event('input'));
+            });
+            container.appendChild(defMarker);
+
+            if (eng.customMarkers) {
+                eng.customMarkers.forEach((m, idx) => {
+                    const cMarker = document.createElement('div');
+                    cMarker.className = `marker custom-marker ${className}`;
+                    let mVal = m.t;
+                    if (axis === 'theta') mVal = m.th;
+                    if (axis === 'phi') mVal = m.ph;
+                    
+                    const pct = toPercent(mVal, minV, maxV);
+                    cMarker.style[styleProp] = `${pct}%`;
+                    cMarker.title = `${this.t('customMarkerTooltip')} (${mVal.toFixed(1)})`;
+                    
+                    cMarker.addEventListener('click', () => {
+                        this.sliderT.value = m.t;
+                        this.sliderTheta.value = m.th;
+                        this.sliderPhi.value = m.ph;
+                        this.sliderT.dispatchEvent(new Event('input'));
+                    });
+                    
+                    container.appendChild(cMarker);
+                });
+            }
+        });
     }
 
     drawHUD() {

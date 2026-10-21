@@ -14,6 +14,7 @@
             --text: #e6e8ec;
             --text2: #9aa0ab;
             --accent: #8fb4c9;
+            --accent-marker: #e2a054;
             --accent-soft: rgba(143, 180, 201, 0.16);
         }
 
@@ -26,25 +27,24 @@
             color: var(--text);
         }
 
-        #canvas-container {
+        #canvas-container, #hud-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+        }
+
+        #canvas-container {
             z-index: 1;
         }
 
         #hud-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
             z-index: 2;
             pointer-events: none;
         }
 
+        /* --- LEGEND PANEL (DROITE) --- */
         #right-panel {
             position: absolute;
             right: 20px;
@@ -160,6 +160,7 @@
             cursor: pointer;
         }
 
+        /* --- CONTROLS PANEL (GAUCHE) AVEC MARQUEURS --- */
         #controls-panel {
             position: absolute;
             bottom: 20px;
@@ -203,7 +204,7 @@
             gap: 20px;
         }
 
-        /* Wrapper */
+        /* Wrappers des sliders pour accueillir les marqueurs */
         .slider-track-wrapper {
             position: relative;
             display: flex;
@@ -216,7 +217,43 @@
                 height: 30px;
             }
 
-        /* Configuration Verticale */
+        /* Les containers de marqueurs absolus */
+        .markers-container {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+            .markers-container.horiz {
+                left: 0;
+                right: 0;
+                top: 0;
+                height: 100%;
+            }
+
+        /* Les traits de marqueurs */
+        .marker {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+            .marker:hover {
+                transform: scale(1.3);
+                z-index: 10;
+            }
+
+            .marker.default-marker {
+                background: var(--accent);
+            }
+
+            .marker.custom-marker {
+                background: var(--accent-marker);
+                border: 1px solid #fff;
+            }
+
+        /* Disposition Verticale */
         .vertical-slider-container {
             display: flex;
             flex-direction: column;
@@ -232,7 +269,22 @@
             width: 30px;
         }
 
-        /* Hack CSS pour Slider Vertical */
+        .markers-container:not(.horiz) {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .marker.vertical-m {
+            width: 12px;
+            height: 3px;
+            left: -6px;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        /* Hack CSS Slider Vertical */
         input[type=range][orient=vertical] {
             writing-mode: vertical-lr;
             direction: rtl;
@@ -243,7 +295,7 @@
             vertical-align: bottom;
         }
 
-        /* Configuration Horizontale */
+        /* Disposition Horizontale */
         .horizontal-sliders-container {
             flex: 1;
             display: flex;
@@ -271,12 +323,22 @@
             margin: 0;
         }
 
-        /* Design des Sliders webkits natifs */
+        .marker.horizontal-m {
+            width: 3px;
+            height: 12px;
+            top: -6px;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Design Webkit Sliders */
         input[type="range"] {
             -webkit-appearance: none;
             background: rgba(255,255,255,0.1);
             border-radius: 4px;
             outline: none;
+            position: relative;
+            z-index: 10;
         }
 
             input[type="range"]::-webkit-slider-thumb {
@@ -309,6 +371,7 @@
                 background: var(--tile-hover);
             }
 
+        /* Loading */
         #loading-overlay {
             position: fixed;
             top: 0;
@@ -358,7 +421,6 @@
             }
     </style>
 
-    <!-- IMPORT MAP: Permet d'importer Three.js nativement sans compilateur Vite/Webpack -->
     <script type="importmap">
         {
             "imports": {
@@ -378,13 +440,13 @@
     <div id="canvas-container"></div>
     <canvas id="hud-canvas"></canvas>
 
-    <!-- CHEVRON CORRIGÉ ICI 👇 -->
     <div id="right-panel">
         <div class="panel-header legend-header">
             <h2 data-i18n="measurementsTitle">Mensurations</h2>
         </div>
         <div id="legend-content"></div>
-    </div> <!-- FIN DU RIGHT PANEL ICI -->
+    </div>
+
     <div id="controls-panel" class="hidden">
         <div class="controls-header">
             <h4>Ajustement Tailleur</h4>
@@ -397,6 +459,7 @@
                 <span class="slider-label">Taille haute</span>
                 <div class="slider-track-wrapper">
                     <input type="range" id="slider-t" min="0" max="1" step="0.001" value="0.5" orient="vertical">
+                    <div id="markers-container-t" class="markers-container"></div>
                 </div>
                 <span class="slider-label">Taille basse</span>
             </div>
@@ -407,6 +470,7 @@
                     <span class="slider-label">Inclinaison Avant/Arrière (Theta : <strong id="label-val-theta" style="color: var(--accent);">0.0°</strong>)</span>
                     <div class="slider-track-wrapper horiz">
                         <input type="range" id="slider-theta" min="-12" max="12" step="0.1" value="0">
+                        <div id="markers-container-theta" class="markers-container horiz"></div>
                     </div>
                 </div>
 
@@ -414,6 +478,7 @@
                     <span class="slider-label">Inclinaison Gauche/Droite (Phi : <strong id="label-val-phi" style="color: var(--accent);">0.0°</strong>)</span>
                     <div class="slider-track-wrapper horiz">
                         <input type="range" id="slider-phi" min="-12" max="12" step="0.1" value="0">
+                        <div id="markers-container-phi" class="markers-container horiz"></div>
                     </div>
                 </div>
             </div>
