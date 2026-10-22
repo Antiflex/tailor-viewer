@@ -1,27 +1,113 @@
+//viewer.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 const I18N = {
+    en: {
+        loading: "Loading 3D model...",
+        errorPrefix: "Error: ",
+        missingPaths: "Missing model or data.",
+        cannotReadJson: "Cannot read results.json",
+        modelNotFound: "Model not found. Loading default model...",
+        criticalError: "Critical error: Default model not found.",
+        measurementsTitle: "Measurements",
+        adjustTitle: "Tailor Adjustment",
+        highWaist: "High",
+        lowWaist: "Low",
+        tiltFB: "Front/Back Tilt (Theta: ",
+        tiltLR: "Left/Right Tilt (Phi: ",
+        resetBtn: "Reset",
+        resetTooltip: "Reset all sliders to default",
+        changeColorTooltip: "Change color",
+        toggleGroupTooltip: "Show / Hide group",
+        toggleSingleTooltip: "Show / Hide measurement",
+        toggleAllTooltip: "Show / Hide all",
+        filterTooltip: "Filter Left / Right / Default",
+        defaultFilter: "Default",
+        leftOnly: "L Only",
+        rightOnly: "R Only",
+        leftShort: "L",
+        rightShort: "R",
+        leftTitle: "Left Side",
+        rightTitle: "Right Side",
+        originalTag: "Original",
+        cloneTag: "Symmetric clone",
+        defaultMarkerTooltip: "Click to reset this slider to default value",
+        customMarkerTooltip: "Custom marker (click to apply)",
+        fullscreenTooltip: "Toggle Fullscreen (F11 / Esc)",
+        langTooltip: "Switch Language (EN / FR)",
+        infoAvailable: "Description available",
+        editableMeas: "Adjustable measurement"
+    },
     fr: {
-        loading: "Chargement du modèle...",
+        loading: "Chargement du mod\u00e8le...",
         errorPrefix: "Erreur : ",
-        missingPaths: "Modèle ou données manquantes.",
+        missingPaths: "Mod\u00e8le ou donn\u00e9es manquantes.",
         cannotReadJson: "Impossible de lire results.json",
-        heightLabel: "Taille",
+        modelNotFound: "Mod\u00e8le introuvable. Chargement du mod\u00e8le par d\u00e9faut...",
+        criticalError: "Erreur critique : Mod\u00e8le par d\u00e9faut introuvable.",
+        measurementsTitle: "Mensurations",
+        adjustTitle: "Ajustement Tailleur",
+        highWaist: "Taille haute",
+        lowWaist: "Taille basse",
+        tiltFB: "Inclinaison Avant/Arri\u00e8re (Theta : ",
+        tiltLR: "Inclinaison Gauche/Droite (Phi : ",
+        resetBtn: "Reset",
+        resetTooltip: "Revenir aux valeurs par d\u00e9faut",
         changeColorTooltip: "Changer la couleur",
         toggleGroupTooltip: "Afficher / Masquer le groupe",
         toggleSingleTooltip: "Afficher / Masquer la mesure",
-        leftShort: "G",
-        rightShort: "D",
-        leftTitle: "Côté Gauche",
-        rightTitle: "Côté Droit",
+        toggleAllTooltip: "Afficher / Masquer tout",
+        filterTooltip: "Filtre Gauche / Droit / D\u00e9faut",
+        defaultFilter: "D\u00e9faut",
+        leftOnly: "L Seul",
+        rightOnly: "R Seul",
+        leftShort: "L",
+        rightShort: "R",
+        leftTitle: "C\u00f4t\u00e9 Gauche",
+        rightTitle: "C\u00f4t\u00e9 Droit",
         originalTag: "Original",
-        cloneTag: "Clone symétrique",
-        defaultMarkerTooltip: "Valeur par défaut",
-        customMarkerTooltip: "Marqueur perso"
+        cloneTag: "Clone sym\u00e9trique",
+        defaultMarkerTooltip: "Cliquer pour r\u00e9initialiser ce curseur \u00e0 sa valeur par d\u00e9faut",
+        customMarkerTooltip: "Marqueur perso (cliquer pour appliquer)",
+        fullscreenTooltip: "Plein \u00e9cran (F11 / \u00c9chap)",
+        langTooltip: "Changer de langue (EN / FR)",
+        infoAvailable: "Description disponible",
+        editableMeas: "Mesure ajustable"
     }
 };
+
+// Built-in translation fallback for standard tailoring measurement names
+const MEAS_NAME_DICT = {
+    "tour de poitrine": { fr: "Tour de poitrine", en: "Chest Girth" },
+    "tour de ceinture": { fr: "Tour de ceinture", en: "Waistband Girth" },
+    "tour de cou": { fr: "Tour de cou", en: "Neck Girth" },
+    "tour d'emmanchure": { fr: "Tour d'emmanchure", en: "Armscye Girth" },
+    "tour de poignet": { fr: "Tour de poignet", en: "Wrist Girth" },
+    "tour de mollet": { fr: "Tour de mollet", en: "Calf Girth" },
+    "largeur du dos": { fr: "Largeur du dos", en: "Cross Back Width" },
+    "aplomb epaule-poitrine-bassin": { fr: "Aplomb \u00e9paule-poitrine-bassin", en: "Shoulder-Chest-Pelvis Plumb" },
+    "aplomb \u00e9paule-poitrine-bassin": { fr: "Aplomb \u00e9paule-poitrine-bassin", en: "Shoulder-Chest-Pelvis Plumb" },
+    "largeur d'\u00e9paules": { fr: "Largeur d'\u00e9paules", en: "Shoulder Width" },
+    "largeur d'epaules": { fr: "Largeur d'\u00e9paules", en: "Shoulder Width" },
+    "longueur de manche": { fr: "Longueur de manche", en: "Sleeve Length" },
+    "tour de bras": { fr: "Tour de bras", en: "Upper Arm Girth" },
+    "tour de hanches": { fr: "Tour de hanches", en: "Hip Girth" },
+    "demi-longueur d'\u00e9paule": { fr: "Demi-longueur d'\u00e9paule", en: "Half Shoulder Length" },
+    "demi-longueur d'epaule": { fr: "Demi-longueur d'\u00e9paule", en: "Half Shoulder Length" },
+    "aplomb cervicale c7-sol": { fr: "Aplomb cervicale C7-sol", en: "C7-to-Floor Plumb" },
+    "longueur de jambe int\u00e9rieure": { fr: "Longueur de jambe int\u00e9rieure", en: "Inseam Length" },
+    "longueur de jambe interieure": { fr: "Longueur de jambe int\u00e9rieure", en: "Inseam Length" },
+    "longueur de jambe ext\u00e9rieure": { fr: "Longueur de jambe ext\u00e9rieure", en: "Outseam Length" },
+    "longueur de jambe exterieure": { fr: "Longueur de jambe ext\u00e9rieure", en: "Outseam Length" },
+    "tour de taille": { fr: "Tour de taille", en: "Waist Girth" }
+};
+
+const SVG_EYE_OPEN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+const SVG_EYE_CLOSED = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+const SVG_FULLSCREEN_ENTER = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`;
+const SVG_FULLSCREEN_EXIT = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`;
 
 class MeasurementViewer {
     constructor() {
@@ -29,14 +115,17 @@ class MeasurementViewer {
         
         const modelName = urlParams.get('model');
         if (modelName) {
+            this.currentModelName = modelName;
             this.objPath = `models/${modelName}.obj`;
             this.jsonPath = `measurements/${modelName}.json`;
         } else {
             this.objPath = urlParams.get('obj');
             this.jsonPath = urlParams.get('json');
+            this.currentModelName = this.objPath || '';
         }
 
-        this.lang = urlParams.get('lang') || 'fr';
+        // Point 6: English by default
+        this.lang = urlParams.get('lang') || 'en';
         this.theme = urlParams.get('theme') || 'dark';
 
         this.resultsData = null;
@@ -53,37 +142,13 @@ class MeasurementViewer {
         this.sliderTheta = document.getElementById('slider-theta');
         this.sliderPhi = document.getElementById('slider-phi');
 
-        this.descPanel = document.createElement('div');
-        this.descPanel.id = 'description-panel';
-        this.descPanel.className = 'hidden';
-        this.descPanel.style.display = 'none'; // CORRECTION : Caché au démarrage
-        this.descPanel.style.position = 'absolute';
-        this.descPanel.style.bottom = '20px';
-        this.descPanel.style.left = '20px';
-        this.descPanel.style.maxWidth = '320px';
-        this.descPanel.style.padding = '15px';
-        this.descPanel.style.backgroundColor = 'rgba(22, 24, 28, 0.9)';
-        this.descPanel.style.border = '1px solid rgba(255, 215, 0, 0.4)';
-        this.descPanel.style.borderRadius = '8px';
-        this.descPanel.style.color = '#eee';
-        this.descPanel.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-        this.descPanel.style.zIndex = '100';
-        this.descPanel.style.backdropFilter = 'blur(10px)';
-        this.descPanel.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        this.descPanel.style.transition = 'bottom 0.2s ease-out';
-        
-        this.descPanel.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-                <span style="color: #ffd700; font-weight: bold; border: 2px solid #ffd700; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 12px;">i</span>
-                <strong id="desc-panel-title" style="font-size: 14px; color: #ffd700; text-transform: capitalize;"></strong>
-            </div>
-            <div id="desc-panel-content" style="font-size: 13.5px; line-height: 1.4; color: #ddd;"></div>
-        `;
-        document.body.appendChild(this.descPanel);
+        this.injectCustomStyles();
+        this.setupTopLeftUI();
+        this.setupMergedBottomLeftPanel();
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         
         this.avatarGroup = new THREE.Group();
         this.measurementsGroup = new THREE.Group();
@@ -94,8 +159,378 @@ class MeasurementViewer {
     }
 
     t(key) {
-        const dict = I18N[this.lang] || I18N.fr;
-        return dict[key] || I18N.fr[key] || key;
+        const dict = I18N[this.lang] || I18N.en;
+        return dict[key] || I18N.en[key] || key;
+    }
+
+    injectCustomStyles() {
+        if (document.getElementById('tailor-injected-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'tailor-injected-styles';
+        style.textContent = `
+            :root {
+                --bg: #1F2123 !important;
+                --bg-grad: none !important;
+            }
+            body, #loading-overlay {
+                background: #1F2123 !important;
+            }
+            /* Point 8: Widen right panel and compact items to fit on 1 line without scrollbar */
+            #right-panel {
+                width: 430px !important;
+                max-width: calc(100vw - 40px);
+            }
+            #legend-content {
+                padding: 8px 10px !important;
+            }
+            .legend-item {
+                margin-bottom: 5px !important;
+                padding: 7px 12px !important;
+            }
+            .visibility-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                color: #e6e8ec;
+                opacity: 0.75;
+                transition: opacity 0.2s;
+            }
+            .visibility-toggle:hover {
+                opacity: 1;
+            }
+            .visibility-toggle.off {
+                opacity: 0.35;
+            }
+            /* Points 11 & 12: Round grey L/R buttons and tight spacing */
+            .lr-inline-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .lr-side-unit {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 2px 5px;
+                border-radius: 6px;
+                border: 1px solid transparent;
+                transition: all 0.15s;
+                cursor: pointer;
+            }
+            .lr-side-unit:hover {
+                background: rgba(255, 255, 255, 0.06);
+            }
+            .lr-side-unit.active-edit {
+                background: rgba(78, 168, 222, 0.2);
+                border-color: var(--accent);
+            }
+            .lr-side-unit.side-hidden {
+                opacity: 0.35;
+            }
+            .lr-round-btn {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #5a6069;
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                font-size: 10px;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                padding: 0;
+                line-height: 1;
+                flex-shrink: 0;
+                transition: background 0.15s, transform 0.1s;
+            }
+            .lr-round-btn:hover {
+                transform: scale(1.08);
+                background: #737a85;
+            }
+            .lr-round-btn.checked {
+                background: #6c737d;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+            }
+            .lr-val-span {
+                font-size: 13px;
+                white-space: nowrap;
+            }
+            /* Points 4, 6, 7: Top-left bar */
+            #top-left-bar {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 30;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: auto;
+            }
+            .top-left-Controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .top-ui-btn {
+                background: rgba(22, 24, 28, 0.85);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #e6e8ec;
+                border-radius: 8px;
+                padding: 6px 11px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                backdrop-filter: blur(8px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                transition: background 0.2s, border-color 0.2s;
+            }
+            .top-ui-btn:hover {
+                background: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            #model-identity-badge {
+                background: rgba(22, 24, 28, 0.85);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #e6e8ec;
+                backdrop-filter: blur(8px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                white-space: nowrap;
+            }
+            /* Point 15: Merged Info + Adjustment panel with thin orange/gold border */
+            #controls-panel {
+                background: rgba(22, 24, 28, 0.92) !important;
+                border: 1px solid rgba(255, 180, 0, 0.55) !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                width: 380px !important;
+                max-width: calc(100vw - 40px);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
+            }
+            #merged-desc-divider {
+                border: 0;
+                height: 1px;
+                background: rgba(255, 255, 255, 0.12);
+                margin: 12px 0;
+            }
+            /* Point 16: Default reset marker placed BELOW the horizontal slider track */
+            .slider-track-wrapper.horiz {
+                height: 32px !important;
+                padding-bottom: 6px;
+            }
+            .marker.horizontal-m {
+                top: auto !important;
+                bottom: 0px !important;
+                width: 4px !important;
+                height: 10px !important;
+                border-radius: 2px;
+                z-index: 15;
+            }
+            .marker.vertical-m {
+                left: auto !important;
+                right: 0px !important;
+                width: 10px !important;
+                height: 4px !important;
+                border-radius: 2px;
+                z-index: 15;
+            }
+            .marker.default-marker {
+                background: #4ea8de !important;
+                box-shadow: 0 0 4px rgba(78, 168, 222, 0.8);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    setupTopLeftUI() {
+        let bar = document.getElementById('top-left-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'top-left-bar';
+            bar.innerHTML = `
+                <div class="top-left-Controls">
+                    <button id="btn-lang-switch" class="top-ui-btn" title="${this.t('langTooltip')}"></button>
+                    <button id="btn-fullscreen-toggle" class="top-ui-btn" title="${this.t('fullscreenTooltip')}">
+                        ${SVG_FULLSCREEN_ENTER}
+                    </button>
+                </div>
+                <div id="model-identity-badge"></div>
+            `;
+            document.body.appendChild(bar);
+        }
+
+        this.langBtn = document.getElementById('btn-lang-switch');
+        this.fullscreenBtn = document.getElementById('btn-fullscreen-toggle');
+        this.identityBadge = document.getElementById('model-identity-badge');
+
+        this.updateLangButtonLabel();
+        this.updateModelIdentityDisplay(this.currentModelName);
+
+        if (this.langBtn) {
+            this.langBtn.addEventListener('click', () => {
+                this.lang = this.lang === 'en' ? 'fr' : 'en';
+                document.documentElement.lang = this.lang;
+                this.updateLangButtonLabel();
+                this.applyLanguageToDOM();
+            });
+        }
+
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (this.fullscreenBtn) {
+                this.fullscreenBtn.innerHTML = document.fullscreenElement ? SVG_FULLSCREEN_EXIT : SVG_FULLSCREEN_ENTER;
+            }
+        });
+    }
+
+    updateLangButtonLabel() {
+        if (!this.langBtn) return;
+        if (this.lang === 'en') {
+            this.langBtn.innerHTML = `<span style="color:#ffd700;">EN</span> <span style="opacity:0.4;">|</span> <span style="opacity:0.6;">FR</span>`;
+        } else {
+            this.langBtn.innerHTML = `<span style="opacity:0.6;">EN</span> <span style="opacity:0.4;">|</span> <span style="color:#ffd700;">FR</span>`;
+        }
+    }
+
+    // Point 7: Format model identity as "Type Gender - Height cm"
+    updateModelIdentityDisplay(rawModelString) {
+        if (!this.identityBadge || !rawModelString) return;
+        const clean = rawModelString.replace(/^.*[\\/]/, '').replace(/\.[^/.]+$/, '');
+        const match = clean.match(/^(.+)_(man|woman)_(\d+)$/i);
+        if (match) {
+            const rawType = match[1].split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+            const rawGender = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
+            const rawHeight = match[3];
+            this.identityBadge.textContent = `${rawType} ${rawGender} - ${rawHeight} cm`;
+            this.identityBadge.style.display = 'block';
+        } else {
+            this.identityBadge.textContent = clean.replace(/_/g, ' ');
+            this.identityBadge.style.display = clean ? 'block' : 'none';
+        }
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn("Fullscreen request failed:", err);
+            });
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+
+    // Point 15: Merge Info panel and Edit controls inside #controls-panel
+    setupMergedBottomLeftPanel() {
+        if (!this.controlsPanel) return;
+
+        // Wrap existing children of #controls-panel into #merged-edit-section
+        this.editSection = document.createElement('div');
+        this.editSection.id = 'merged-edit-section';
+        while (this.controlsPanel.firstChild) {
+            this.editSection.appendChild(this.controlsPanel.firstChild);
+        }
+
+        // Create Info section at the top of #controls-panel
+        this.descSection = document.createElement('div');
+        this.descSection.id = 'merged-desc-section';
+        this.descSection.style.display = 'none';
+        this.descSection.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                <span style="color: #ffd700; font-weight: bold; border: 2px solid #ffd700; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 12px; flex-shrink: 0;">i</span>
+                <strong id="desc-panel-title" style="font-size: 14px; color: #ffd700;"></strong>
+            </div>
+            <div id="desc-panel-content" style="font-size: 13px; line-height: 1.45; color: #ddd;"></div>
+        `;
+
+        // Create subtle grey horizontal separator
+        this.mergedDivider = document.createElement('hr');
+        this.mergedDivider.id = 'merged-desc-divider';
+        this.mergedDivider.style.display = 'none';
+
+        this.controlsPanel.appendChild(this.descSection);
+        this.controlsPanel.appendChild(this.mergedDivider);
+        this.controlsPanel.appendChild(this.editSection);
+    }
+
+    getLocalizedName(rawKey, data) {
+        if (data && data.name && typeof data.name === 'object') {
+            return data.name[this.lang] || data.name.en || data.name.fr || rawKey.replace(/_/g, ' ');
+        }
+        const baseKey = (data && typeof data.name === 'string' ? data.name : rawKey).replace(/_/g, ' ').trim();
+        const lookup = MEAS_NAME_DICT[baseKey.toLowerCase()];
+        if (lookup) {
+            return lookup[this.lang] || lookup.en || baseKey;
+        }
+        return baseKey;
+    }
+
+    getLocalizedDesc(data) {
+        if (!data || !data.description) return "";
+        if (typeof data.description === 'object') {
+            return (data.description[this.lang] || data.description.en || data.description.fr || "").trim();
+        }
+        return String(data.description).trim();
+    }
+
+    applyLanguageToDOM() {
+        const titleEl = document.querySelector('.legend-header h2');
+        if (titleEl) titleEl.textContent = this.t('measurementsTitle');
+
+        const adjustHeaderEl = this.editSection ? this.editSection.querySelector('.controls-header h4') : null;
+        if (adjustHeaderEl) adjustHeaderEl.textContent = this.t('adjustTitle');
+
+        const btnReset = document.getElementById('btn-reset-slider');
+        if (btnReset) {
+            btnReset.textContent = `\u21ba ${this.t('resetBtn')}`;
+            btnReset.title = this.t('resetTooltip');
+        }
+
+        if (this.editSection) {
+            const vLabels = this.editSection.querySelectorAll('.vertical-slider-container .slider-label');
+            if (vLabels.length >= 2) {
+                vLabels[0].textContent = this.t('highWaist');
+                vLabels[1].textContent = this.t('lowWaist');
+            }
+            const hGroups = this.editSection.querySelectorAll('.horiz-group .slider-label');
+            if (hGroups.length >= 2) {
+                const curTh = this.sliderTheta ? parseFloat(this.sliderTheta.value) : 0;
+                const curPh = this.sliderPhi ? parseFloat(this.sliderPhi.value) : 0;
+                hGroups[0].innerHTML = `${this.t('tiltFB')}<strong id="label-val-theta" style="color: var(--accent);">${curTh > 0 ? '+' : ''}${curTh.toFixed(1)}\u00b0</strong>)`;
+                hGroups[1].innerHTML = `${this.t('tiltLR')}<strong id="label-val-phi" style="color: var(--accent);">${curPh > 0 ? '+' : ''}${curPh.toFixed(1)}\u00b0</strong>)`;
+            }
+        }
+
+        if (this.sideToggleBtn && this.sideToggleStates) {
+            this.updateSideToggleStates();
+            this.sideToggleBtn.textContent = this.sideToggleStates[this.currentFilterStateIndex].text;
+            this.sideToggleBtn.title = this.t('filterTooltip');
+        }
+
+        // Update measurement names in legend
+        this.activeMeasurements.forEach(mObj => {
+            if (mObj.nameSpan) {
+                mObj.nameSpan.textContent = this.getLocalizedName(mObj.groupKey || mObj.id, mObj.rawData);
+            }
+        });
+
+        // Refresh open description/adjustment panel if a measurement is selected
+        if (this.selectedMeasurement) {
+            this.updateMergedPanelContent(this.selectedMeasurement);
+            this.renderMarkers(this.selectedMeasurement);
+        }
     }
 
     async init() {
@@ -105,18 +540,20 @@ class MeasurementViewer {
         this.setupControls();
         this.setupEvents();
         this.setupSliderEvents();
+        this.applyLanguageToDOM();
 
         const loadData = async (obj, json) => {
             await this.loadAvatar(obj);
             await this.loadMeasurements(json);
+            this.frameModelFullHeight();
         };
 
         try {
-            if (!this.objPath || !this.jsonPath) throw new Error("Chemins manquants");
+            if (!this.objPath || !this.jsonPath) throw new Error(this.t('missingPaths'));
             await loadData(this.objPath, this.jsonPath);
         } catch (error) {
-            console.warn("Échec du modèle demandé, tentative de chargement du modèle par défaut...", error);
-            this.showToast("Modèle introuvable. Chargement du modèle par défaut...", true);
+            console.warn("Requested model failed, loading fallback model...", error);
+            this.showToast(this.t('modelNotFound'), true);
             
             const toRemove = [...this.avatarGroup.children, ...this.measurementsGroup.children];
             toRemove.forEach(c => {
@@ -125,16 +562,18 @@ class MeasurementViewer {
                     if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
                     else c.material.dispose();
                 }
-                c.parent.remove(c);
+                if (c.parent) c.parent.remove(c);
             });
             this.activeMeasurements = [];
             this.legendContent.innerHTML = '';
 
             try {
+                this.currentModelName = 'average_man_182';
+                this.updateModelIdentityDisplay(this.currentModelName);
                 await loadData('models/average_man_182.obj', 'measurements/average_man_182.json');
             } catch (fallbackError) {
                 const errEl = document.getElementById('loading-text');
-                if (errEl) errEl.textContent = "Erreur critique : Modèle par défaut introuvable.";
+                if (errEl) errEl.textContent = this.t('criticalError');
                 return;
             }
         }
@@ -145,6 +584,34 @@ class MeasurementViewer {
             setTimeout(() => overlay.style.display = 'none', 500);
         }
         this.animate();
+    }
+
+    // Point 3: Fit 3D model to full viewport height with ~0.5 cm top and bottom margin
+    frameModelFullHeight() {
+        this.avatarGroup.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(this.avatarGroup);
+        if (box.isEmpty()) return;
+
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+
+        // 0.5 cm at standard 96 DPI is ~19 pixels top and 19 pixels bottom
+        const marginPx = 19;
+        const viewHeight = Math.max(window.innerHeight, 200);
+        const usableHeightFraction = Math.max(0.5, (viewHeight - 2 * marginPx) / viewHeight);
+
+        const halfFovRad = THREE.MathUtils.degToRad(this.camera.fov * 0.5);
+        const distanceToFitY = (size.y * 0.5) / (Math.tan(halfFovRad) * usableHeightFraction);
+        const finalDistance = distanceToFitY + size.z * 0.22;
+
+        this.controls.target.set(center.x, center.y, center.z);
+        this.camera.position.set(center.x, center.y, center.z + finalDistance);
+        this.camera.near = Math.max(0.01, finalDistance * 0.05);
+        this.camera.far = Math.max(50, finalDistance * 10);
+        this.camera.updateProjectionMatrix();
+        this.controls.update();
     }
 
     showToast(message, isError = false) {
@@ -175,14 +642,12 @@ class MeasurementViewer {
 
     applyTheme() {
         document.documentElement.setAttribute('data-theme', this.theme);
-        setTimeout(() => {
-            const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#16181c';
-            this.scene.background = new THREE.Color(bgColor);
-        }, 50);
+        // Point 1: Solid #1F2123 background
+        this.scene.background = new THREE.Color('#1F2123');
     }
 
     setupScene() {
-        this.camera.position.set(0, 1.2, 3.5);
+        this.camera.position.set(0, 1.0, 2.6);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
@@ -213,6 +678,16 @@ class MeasurementViewer {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Point 4: F11 and Escape keyboard shortcuts for fullscreen
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                this.toggleFullscreen();
+            } else if (e.key === 'Escape' && document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         });
 
         this.renderer.domElement.addEventListener('pointerdown', (e) => {
@@ -268,18 +743,18 @@ class MeasurementViewer {
             
             const lblTh = document.getElementById('label-val-theta');
             const lblPh = document.getElementById('label-val-phi');
-            if (lblTh) lblTh.textContent = `${th_val > 0 ? '+' : ''}${th_val.toFixed(1)}°`;
-            if (lblPh) lblPh.textContent = `${ph_val > 0 ? '+' : ''}${ph_val.toFixed(1)}°`;
+            if (lblTh) lblTh.textContent = `${th_val > 0 ? '+' : ''}${th_val.toFixed(1)}\u00b0`;
+            if (lblPh) lblPh.textContent = `${ph_val > 0 ? '+' : ''}${ph_val.toFixed(1)}\u00b0`;
             
             this.applyInterpolatedMeasurement(this.selectedMeasurement, t_val, th_val, ph_val);
         };
 
-        if(this.sliderT) this.sliderT.addEventListener('input', updateFromSliders);
-        if(this.sliderTheta) this.sliderTheta.addEventListener('input', updateFromSliders);
-        if(this.sliderPhi) this.sliderPhi.addEventListener('input', updateFromSliders);
+        if (this.sliderT) this.sliderT.addEventListener('input', updateFromSliders);
+        if (this.sliderTheta) this.sliderTheta.addEventListener('input', updateFromSliders);
+        if (this.sliderPhi) this.sliderPhi.addEventListener('input', updateFromSliders);
 
         const btnReset = document.getElementById('btn-reset-slider');
-        if(btnReset) {
+        if (btnReset) {
             btnReset.addEventListener('click', () => {
                 if (this.selectedMeasurement) this.resetToDefaultGrid(this.selectedMeasurement);
             });
@@ -301,6 +776,17 @@ class MeasurementViewer {
         });
     }
 
+    updateSideToggleStates() {
+        const lblL = this.t('leftShort');
+        const lblR = this.t('rightShort');
+        this.sideToggleStates = [
+            { text: this.t('defaultFilter'), filter: 'DEFAULT' },
+            { text: `${lblL} / ${lblR}`, filter: 'ALL' },
+            { text: this.t('leftOnly'), filter: 'LEFT' },
+            { text: this.t('rightOnly'), filter: 'RIGHT' }
+        ];
+    }
+
     setupHeaderToggles() {
         const header = document.querySelector('.legend-header');
         if (!header) return;
@@ -320,7 +806,7 @@ class MeasurementViewer {
         header.appendChild(container);
 
         const sideToggle = document.createElement('div');
-        sideToggle.title = 'Filtre Gauche / Droit / Défaut';
+        sideToggle.title = this.t('filterTooltip');
         sideToggle.style.cursor = 'pointer';
         sideToggle.style.fontWeight = 'bold';
         sideToggle.style.fontSize = '11px';
@@ -332,22 +818,16 @@ class MeasurementViewer {
         sideToggle.style.userSelect = 'none';
         sideToggle.style.transition = 'background 0.2s';
         
-        const lblL = this.t('leftShort');
-        const lblR = this.t('rightShort');
-        const states = [
-            { text: `Défaut`, filter: 'DEFAULT' },
-            { text: `${lblL} / ${lblR}`, filter: 'ALL' },
-            { text: `${lblL} Seul`, filter: 'LEFT' },
-            { text: `${lblR} Seul`, filter: 'RIGHT' }
-        ];
-        let currentState = 0;
-        sideToggle.textContent = states[currentState].text;
+        this.sideToggleBtn = sideToggle;
+        this.currentFilterStateIndex = 0;
+        this.updateSideToggleStates();
+        sideToggle.textContent = this.sideToggleStates[this.currentFilterStateIndex].text;
 
         sideToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            currentState = (currentState + 1) % states.length;
-            sideToggle.textContent = states[currentState].text;
-            const filter = states[currentState].filter;
+            this.currentFilterStateIndex = (this.currentFilterStateIndex + 1) % this.sideToggleStates.length;
+            sideToggle.textContent = this.sideToggleStates[this.currentFilterStateIndex].text;
+            const filter = this.sideToggleStates[this.currentFilterStateIndex].filter;
 
             this.activeMeasurements.forEach(mObj => {
                 const side = mObj.rawData.side || 'SINGLE';
@@ -359,24 +839,26 @@ class MeasurementViewer {
                 else if (filter === 'RIGHT') shouldBeVisible = (side === 'RIGHT');
                 else if (filter === 'DEFAULT') shouldBeVisible = !mObj.rawData.is_clone;
                 
-                if (mObj.checkboxEl && mObj.checkboxEl.checked !== shouldBeVisible) {
-                    mObj.checkboxEl.checked = shouldBeVisible;
-                    mObj.checkboxEl.dispatchEvent(new Event('change'));
+                if (mObj.setSideChecked && mObj.isChecked !== shouldBeVisible) {
+                    mObj.setSideChecked(shouldBeVisible);
                 }
             });
         });
         container.appendChild(sideToggle);
 
+        // Point 10: SVG Eye icon for global visibility
         const eyeToggle = document.createElement('div');
-        eyeToggle.title = 'Afficher / Masquer tout';
+        eyeToggle.className = 'visibility-toggle';
+        eyeToggle.title = this.t('toggleAllTooltip');
         eyeToggle.style.cursor = 'pointer';
-        eyeToggle.innerHTML = '👁️';
+        eyeToggle.innerHTML = SVG_EYE_OPEN;
 
         let globalAllVisible = true;
         eyeToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             globalAllVisible = !globalAllVisible;
             eyeToggle.classList.toggle('off', !globalAllVisible);
+            eyeToggle.innerHTML = globalAllVisible ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
             
             const legendItems = document.querySelectorAll('#legend-content .legend-item');
             legendItems.forEach(item => {
@@ -427,17 +909,14 @@ class MeasurementViewer {
         if (data.type === 'plumb' || data.type === 'caliper') hexColor = 0xcc33ff;
         const cssColor = '#' + hexColor.toString(16).padStart(6, '0');
         
-        // CORRECTION : Détection intelligente des boucles fermées sans template
         let isClosed = data.is_closed_loop === true || data.is_closed === true;
         if (data.type === 'slicer') isClosed = true;
         
         if (points.length > 2) {
             const dist = points[0].distanceTo(points[points.length - 1]);
-            // Si le début et la fin sont très proches (moins de 4 cm), c'est une boucle (tape ou slicer)
             if (dist < 0.04) {
                 isClosed = true;
             }
-            // Retirer le dernier point s'il chevauche le premier pour éviter l'artefact graphique du CatmullRom
             if (isClosed && dist < 0.02) {
                 points.pop(); 
             }
@@ -512,7 +991,7 @@ class MeasurementViewer {
         let spriteOffsetX = 0.0;
         iconGroup.position.x += 0.042; 
 
-        if (data.description && data.description.trim() !== "") {
+        if (this.getLocalizedDesc(data) !== "") {
             const infoSprite = this.createIconSprite('info');
             infoSprite.position.set(spriteOffsetX, 0.02, 0);
             iconGroup.add(infoSprite);
@@ -538,6 +1017,7 @@ class MeasurementViewer {
 
         return {
             id: name,
+            groupKey: name,
             anchor3D: anchorObj,
             iconGroup: iconGroup,
             lengthSprite: lengthSprite,
@@ -638,24 +1118,27 @@ class MeasurementViewer {
         div.style.borderLeftColor = mObj.color;
         
         const hasGrid = data.ui_grid && data.ui_grid.length > 0;
-        const descText = data.description || "";
+        const descText = this.getLocalizedDesc(data);
+        const displayName = this.getLocalizedName(name, data);
 
         div.innerHTML = `
             <div class="color-hint" style="position: absolute; left: -8px; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 2;">
-                <span style="font-size: 8px; line-height: 1;">🎨</span>
+                <span style="font-size: 8px; line-height: 1;">&#127912;</span>
             </div>
             <input type="color" class="color-picker" value="${mObj.color}" title="${this.t('changeColorTooltip')}" style="position: absolute; left: -16px; top: 0; width: 16px; height: 100%; opacity: 0; cursor: pointer; pointer-events: none; z-index: 3;">
             
             <div class="legend-info" style="width: 100%; display: flex; flex-direction: column;">
                 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="legend-name" style="white-space: nowrap;">${name.replace(/_/g, ' ')}</span>
-                        ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="Description disponible">i</span>` : ''}
-                        ${hasGrid ? `<span title="Mesure ajustable" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 2px 5px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">🎛️ EDIT</span>` : ''}
+                    <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                        <span class="legend-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;">${displayName}</span>
+                        ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="${this.t('infoAvailable')}">i</span>` : ''}
+                        ${hasGrid ? `<span title="${this.t('editableMeas')}" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 1px 4px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">EDIT</span>` : ''}
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-left: auto; padding-left: 10px;">
-                        <span class="legend-value" style="white-space: nowrap;">${data.value_cm.toFixed(1)} cm</span>
-                        <div class="visibility-toggle" title="${this.t('toggleSingleTooltip')}" style="cursor: pointer; flex-shrink: 0;">👁️</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-left: 8px; flex-shrink: 0;">
+                        <span class="legend-value" style="white-space: nowrap; font-size: 13px;">${data.value_cm.toFixed(1)} cm</span>
+                        <div class="visibility-toggle ${!mObj.isVisible ? 'off' : ''}" title="${this.t('toggleSingleTooltip')}" style="cursor: pointer; flex-shrink: 0;">
+                            ${mObj.isVisible ? SVG_EYE_OPEN : SVG_EYE_CLOSED}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -664,6 +1147,7 @@ class MeasurementViewer {
 
         mObj.domElement = div;
         mObj.hudTargetElement = div;
+        mObj.nameSpan = div.querySelector('.legend-name');
         mObj.valueSpan = div.querySelector('.legend-value');
 
         const eyeIcon = div.querySelector('.visibility-toggle');
@@ -694,6 +1178,7 @@ class MeasurementViewer {
             if (mObj.ghostMax) mObj.ghostMax.visible = (mObj.isVisible && mObj.isSelected);
             
             eyeIcon.classList.toggle('off', !mObj.isVisible);
+            eyeIcon.innerHTML = mObj.isVisible ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
             div.classList.toggle('hidden-item', !mObj.isVisible);
         });
 
@@ -701,11 +1186,13 @@ class MeasurementViewer {
         this.activeMeasurements.push(mObj);
     }
 
+    // Points 8, 10, 11, 12: Paired measurement on a single compact line with round grey L/R buttons
     createPairedMeasurementVisuals(groupName, items) {
         const builtItems = {};
         items.forEach(entry => {
             const mObj = this.build3DTubeForMeasurement(entry.name, entry.data);
             if (mObj) {
+                mObj.groupKey = groupName;
                 mObj.isChecked = mObj.isVisible;
                 builtItems[entry.data.side || 'LEFT'] = mObj;
             }
@@ -722,32 +1209,36 @@ class MeasurementViewer {
         div.style.borderLeftColor = firstObj.color;
 
         const hasGrid = firstObj.rawData.ui_grid && firstObj.rawData.ui_grid.length > 0;
-        const descText = firstObj.rawData.description || "";
+        const descText = this.getLocalizedDesc(firstObj.rawData);
+        const displayName = this.getLocalizedName(groupName, firstObj.rawData);
 
         div.innerHTML = `
             <div class="color-hint" style="position: absolute; left: -8px; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 2;">
-                <span style="font-size: 8px; line-height: 1;">🎨</span>
+                <span style="font-size: 8px; line-height: 1;">&#127912;</span>
             </div>
             <input type="color" class="color-picker" value="${firstObj.color}" title="${this.t('changeColorTooltip')}" style="position: absolute; left: -16px; top: 0; width: 16px; height: 100%; opacity: 0; cursor: pointer; pointer-events: none; z-index: 3;">
             
-            <div style="width: 100%; display: flex; flex-direction: column; gap: 6px;">
-                <div class="paired-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="legend-name" style="white-space: nowrap;">${groupName.replace(/_/g, ' ')}</span>
-                        ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="Description disponible">i</span>` : ''}
-                        ${hasGrid ? `<span title="Mesure ajustable" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 2px 5px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">🎛️ EDIT</span>` : ''}
-                    </div>
-                    <div class="visibility-toggle" title="${this.t('toggleGroupTooltip')}" style="cursor: pointer; margin-left: auto; padding-left: 10px; flex-shrink: 0;">👁️</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                    <span class="legend-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;">${displayName}</span>
+                    ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="${this.t('infoAvailable')}">i</span>` : ''}
+                    ${hasGrid ? `<span title="${this.t('editableMeas')}" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 1px 4px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">EDIT</span>` : ''}
                 </div>
                 
-                <div class="paired-sides-row"></div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
+                    <div class="lr-inline-container"></div>
+                    <div class="visibility-toggle" title="${this.t('toggleGroupTooltip')}" style="cursor: pointer; flex-shrink: 0;">
+                        ${SVG_EYE_OPEN}
+                    </div>
+                </div>
             </div>
         `;
         this.legendContent.appendChild(div);
 
-        const sidesRow = div.querySelector('.paired-sides-row');
+        const sidesContainer = div.querySelector('.lr-inline-container');
         const colorPicker = div.querySelector('.color-picker');
         const eyeIcon = div.querySelector('.visibility-toggle');
+        const nameSpan = div.querySelector('.legend-name');
 
         div._forceVisibility = (forceState) => {
             if (groupMasterVisible !== forceState) {
@@ -760,6 +1251,7 @@ class MeasurementViewer {
             const effectiveMaster = groupMasterVisible && anyChecked;
 
             eyeIcon.classList.toggle('off', !effectiveMaster);
+            eyeIcon.innerHTML = effectiveMaster ? SVG_EYE_OPEN : SVG_EYE_CLOSED;
             div.classList.toggle('hidden-item', !effectiveMaster);
 
             Object.values(builtItems).forEach(mObj => {
@@ -772,6 +1264,9 @@ class MeasurementViewer {
                 
                 if (mObj.sidePill) {
                     mObj.sidePill.classList.toggle('side-hidden', !mObj.isChecked);
+                }
+                if (mObj.roundBtn) {
+                    mObj.roundBtn.classList.toggle('checked', mObj.isChecked);
                 }
             });
         };
@@ -793,57 +1288,55 @@ class MeasurementViewer {
             
             if (groupMasterVisible && !Object.values(builtItems).some(x => x.isChecked)) {
                 firstObj.isChecked = true;
-                if (firstObj.checkboxEl) firstObj.checkboxEl.checked = true;
             }
             syncGroupVisibility();
         });
 
         [
-            { key: 'LEFT', shortLabel: this.t('leftShort'), title: this.t('leftTitle') },
-            { key: 'RIGHT', shortLabel: this.t('rightShort'), title: this.t('rightTitle') }
+            { key: 'LEFT', shortLabel: 'L', titleKey: 'leftTitle' },
+            { key: 'RIGHT', shortLabel: 'R', titleKey: 'rightTitle' }
         ].forEach(sideCfg => {
             const mObj = builtItems[sideCfg.key];
             if (!mObj) return;
 
             const statusTag = mObj.rawData.is_clone ? this.t('cloneTag') : this.t('originalTag');
-            const pill = document.createElement('div');
-            pill.className = `side-pill ${!mObj.isChecked ? 'side-hidden' : ''}`;
-            pill.title = `${sideCfg.title} (${statusTag})`;
-            pill.innerHTML = `
-                <label class="side-check-label">
-                    <input type="checkbox" ${mObj.isChecked ? 'checked' : ''}>
-                    <strong>${sideCfg.shortLabel}</strong>
-                </label>
-                <span class="side-value">${mObj.rawData.value_cm.toFixed(1)} cm</span>
+            const unit = document.createElement('div');
+            unit.className = `lr-side-unit ${!mObj.isChecked ? 'side-hidden' : ''}`;
+            unit.title = `${this.t(sideCfg.titleKey)} (${statusTag})`;
+            unit.innerHTML = `
+                <button type="button" class="lr-round-btn ${mObj.isChecked ? 'checked' : ''}">${sideCfg.shortLabel}</button>
+                <span class="lr-val-span">${mObj.rawData.value_cm.toFixed(1)} cm</span>
             `;
-            sidesRow.appendChild(pill);
+            sidesContainer.appendChild(unit);
 
-            const checkbox = pill.querySelector('input[type="checkbox"]');
-            const labelEl = pill.querySelector('.side-check-label');
+            const roundBtn = unit.querySelector('.lr-round-btn');
 
             mObj.domElement = div;
-            mObj.sidePill = pill;
-            mObj.checkboxEl = checkbox;
-            mObj.hudTargetElement = pill;
-            mObj.valueSpan = pill.querySelector('.side-value');
+            mObj.nameSpan = nameSpan;
+            mObj.sidePill = unit;
+            mObj.roundBtn = roundBtn;
+            mObj.hudTargetElement = unit;
+            mObj.valueSpan = unit.querySelector('.lr-val-span');
 
-            labelEl.addEventListener('click', (e) => e.stopPropagation());
-
-            checkbox.addEventListener('change', (e) => {
-                mObj.isChecked = e.target.checked;
+            mObj.setSideChecked = (state) => {
+                mObj.isChecked = state;
                 if (mObj.isChecked && !groupMasterVisible) {
                     groupMasterVisible = true;
                 }
                 syncGroupVisibility();
+            };
+
+            // Clicking the round L/R button toggles visibility of that side
+            roundBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mObj.setSideChecked(!mObj.isChecked);
             });
 
-            pill.addEventListener('click', (e) => {
+            // Clicking the measurement value selects this side for inspection/adjustment
+            unit.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (!mObj.isChecked || !groupMasterVisible) {
-                    mObj.isChecked = true;
-                    checkbox.checked = true;
-                    groupMasterVisible = true;
-                    syncGroupVisibility();
+                    mObj.setSideChecked(true);
                 }
                 this.selectMeasurement(mObj);
             });
@@ -857,6 +1350,87 @@ class MeasurementViewer {
         });
 
         syncGroupVisibility();
+    }
+
+    updateMergedPanelContent(targetObj) {
+        if (!this.controlsPanel) return;
+
+        const hasGrid = Boolean(targetObj.gridEngine);
+        const descText = this.getLocalizedDesc(targetObj.rawData);
+        const hasGhosts = Boolean(targetObj.ghostMin || targetObj.ghostMax);
+        const hasInfo = (descText !== "" || hasGhosts);
+
+        if (!hasInfo && !hasGrid) {
+            this.controlsPanel.classList.add('hidden');
+            return;
+        }
+
+        this.controlsPanel.classList.remove('hidden');
+
+        // 1. Info Section
+        if (hasInfo && this.descSection) {
+            this.descSection.style.display = 'block';
+            const titleEl = this.descSection.querySelector('#desc-panel-title');
+            if (titleEl) {
+                titleEl.textContent = this.getLocalizedName(targetObj.groupKey || targetObj.id, targetObj.rawData);
+            }
+            const contentEl = this.descSection.querySelector('#desc-panel-content');
+            if (contentEl) {
+                let htmlContent = "";
+                if (descText !== "") {
+                    htmlContent += `<div>${descText}</div>`;
+                }
+                if (hasGhosts) {
+                    const marginAndBorder = descText !== "" ? 'margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);' : '';
+                    htmlContent += `<div style="${marginAndBorder} font-size: 12px; color: #ccc; display: flex; flex-direction: column; gap: 6px;">`;
+                    if (targetObj.ghostMax && targetObj.rawData.value_max_cm) {
+                        htmlContent += `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 18px; height: 4px; background: rgba(255, 68, 68, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
+                                <span>Maximum : <strong style="color: #fff;">${targetObj.rawData.value_max_cm.toFixed(1)} cm</strong></span>
+                            </div>`;
+                    }
+                    if (targetObj.ghostMin && targetObj.rawData.value_min_cm) {
+                        htmlContent += `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 18px; height: 4px; background: rgba(78, 168, 222, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
+                                <span>Minimum : <strong style="color: #fff;">${targetObj.rawData.value_min_cm.toFixed(1)} cm</strong></span>
+                            </div>`;
+                    }
+                    htmlContent += `</div>`;
+                }
+                contentEl.innerHTML = htmlContent;
+            }
+        } else if (this.descSection) {
+            this.descSection.style.display = 'none';
+        }
+
+        // 2. Subtle Grey Divider when BOTH Info and Edit are visible
+        if (this.mergedDivider) {
+            this.mergedDivider.style.display = (hasInfo && hasGrid) ? 'block' : 'none';
+        }
+
+        // 3. Edit Section
+        if (hasGrid && this.editSection) {
+            this.editSection.style.display = 'block';
+            this.configureSlidersRange(targetObj);
+            this.renderMarkers(targetObj);
+
+            const curT = targetObj.currentT !== undefined ? targetObj.currentT : targetObj.rawData.default_t;
+            const curTh = targetObj.currentTheta !== undefined ? targetObj.currentTheta : targetObj.rawData.default_theta;
+            const curPh = targetObj.currentPhi !== undefined ? targetObj.currentPhi : targetObj.rawData.default_phi;
+
+            if (this.sliderT) this.sliderT.value = curT;
+            if (this.sliderTheta) this.sliderTheta.value = curTh;
+            if (this.sliderPhi) this.sliderPhi.value = curPh;
+
+            const lblTh = document.getElementById('label-val-theta');
+            const lblPh = document.getElementById('label-val-phi');
+            if (lblTh) lblTh.textContent = `${curTh > 0 ? '+' : ''}${parseFloat(curTh).toFixed(1)}\u00b0`;
+            if (lblPh) lblPh.textContent = `${curPh > 0 ? '+' : ''}${parseFloat(curPh).toFixed(1)}\u00b0`;
+        } else if (this.editSection) {
+            this.editSection.style.display = 'none';
+        }
     }
 
     selectMeasurement(targetObj) {
@@ -877,96 +1451,10 @@ class MeasurementViewer {
 
         this.selectedMeasurement = toggledOn ? targetObj : null;
 
-        if (this.descPanel) {
-            this.descPanel.style.display = 'none';
-            this.descPanel.classList.add('hidden');
-        }
-        if (this.controlsPanel) {
-            this.controlsPanel.classList.add('hidden');
-        }
-
         if (toggledOn && targetObj) {
-            let controlsVisible = false;
-            
-            if (targetObj.gridEngine) {
-                this.controlsPanel.classList.remove('hidden');
-                this.configureSlidersRange(targetObj);
-                
-                // CORRECTION : Appel à la génération des marqueurs graphiques
-                this.renderMarkers(targetObj);
-
-                const curT = targetObj.currentT !== undefined ? targetObj.currentT : targetObj.rawData.default_t;
-                const curTh = targetObj.currentTheta !== undefined ? targetObj.currentTheta : targetObj.rawData.default_theta;
-                const curPh = targetObj.currentPhi !== undefined ? targetObj.currentPhi : targetObj.rawData.default_phi;
-
-                if(this.sliderT) this.sliderT.value = curT;
-                if(this.sliderTheta) this.sliderTheta.value = curTh;
-                if(this.sliderPhi) this.sliderPhi.value = curPh;
-
-                const lblTh = document.getElementById('label-val-theta');
-                const lblPh = document.getElementById('label-val-phi');
-                if (lblTh) lblTh.textContent = `${curTh > 0 ? '+' : ''}${parseFloat(curTh).toFixed(1)}°`;
-                if (lblPh) lblPh.textContent = `${curPh > 0 ? '+' : ''}${parseFloat(curPh).toFixed(1)}°`;
-                
-                controlsVisible = true;
-            }
-            
-            const descText = targetObj.rawData.description ? targetObj.rawData.description.trim() : "";
-            const hasGhosts = targetObj.ghostMin || targetObj.ghostMax;
-
-            if (descText !== "" || hasGhosts) {
-                if (this.descPanel) {
-                    this.descPanel.style.display = 'block';
-                    this.descPanel.classList.remove('hidden');
-                    
-                    const titleEl = this.descPanel.querySelector('#desc-panel-title');
-                    if (titleEl) titleEl.textContent = targetObj.id.replace(/_/g, ' ');
-                    
-                    const contentEl = this.descPanel.querySelector('#desc-panel-content');
-                    if (contentEl) {
-                        let htmlContent = "";
-                        
-                        if (descText !== "") {
-                            htmlContent += `<div>${descText}</div>`;
-                        }
-                        
-                        if (hasGhosts) {
-                            const marginAndBorder = descText !== "" ? 'margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);' : '';
-                            htmlContent += `<div style="${marginAndBorder} font-size: 12px; color: #ccc; display: flex; flex-direction: column; gap: 8px;">`;
-                            
-                            if (targetObj.ghostMax && targetObj.rawData.value_max_cm) {
-                                htmlContent += `
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 18px; height: 4px; background: rgba(255, 68, 68, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
-                                        <span>Maximum : <strong style="color: #fff;">${targetObj.rawData.value_max_cm.toFixed(1)} cm</strong></span>
-                                    </div>`;
-                            }
-                            
-                            if (targetObj.ghostMin && targetObj.rawData.value_min_cm) {
-                                htmlContent += `
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 18px; height: 4px; background: rgba(78, 168, 222, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
-                                        <span>Minimum : <strong style="color: #fff;">${targetObj.rawData.value_min_cm.toFixed(1)} cm</strong></span>
-                                    </div>`;
-                            }
-                            
-                            htmlContent += `</div>`;
-                        }
-                        
-                        contentEl.innerHTML = htmlContent;
-                    }
-                    
-                    setTimeout(() => {
-                        if (controlsVisible && !this.controlsPanel.classList.contains('hidden')) {
-                            const rect = this.controlsPanel.getBoundingClientRect();
-                            const offset = window.innerHeight - rect.top + 15; 
-                            this.descPanel.style.bottom = `${offset}px`;
-                        } else {
-                            this.descPanel.style.bottom = '20px';
-                        }
-                    }, 10);
-                }
-            }
+            this.updateMergedPanelContent(targetObj);
+        } else if (this.controlsPanel) {
+            this.controlsPanel.classList.add('hidden');
         }
     }
 
@@ -1038,7 +1526,7 @@ class MeasurementViewer {
             minT: t_arr[0], maxT: t_arr[t_arr.length-1],
             minTh, maxTh,
             minPh, maxPh,
-            customMarkers: data.customMarkers || [] // Gère les marqueurs customs s'ils sont dans le JSON
+            customMarkers: data.customMarkers || []
         };
     }
 
@@ -1134,7 +1622,6 @@ class MeasurementViewer {
 
         const points = result.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
         
-        // CORRECTION : S'assurer que le tube interpolé se referme s'il le faut
         let isClosed = item.rawData.is_closed_loop === true || item.rawData.is_closed === true;
         if (item.rawData.type === 'slicer') isClosed = true;
         if (points.length > 2) {
@@ -1185,7 +1672,7 @@ class MeasurementViewer {
         this.sliderT.dispatchEvent(new Event('input'));
     }
 
-    // CORRECTION : Remise en place de la fonction pour afficher les petits traits sur les sliders
+    // Point 16: Render default reset markers below horizontal sliders with clear tooltip
     renderMarkers(item) {
         if (!item.gridEngine) return;
         const eng = item.gridEngine;
@@ -1224,7 +1711,7 @@ class MeasurementViewer {
             container.appendChild(defMarker);
 
             if (eng.customMarkers) {
-                eng.customMarkers.forEach((m, idx) => {
+                eng.customMarkers.forEach((m) => {
                     const cMarker = document.createElement('div');
                     cMarker.className = `marker custom-marker ${className}`;
                     let mVal = m.t;
