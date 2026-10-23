@@ -1,4 +1,4 @@
-//viewer.js
+// viewer.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -15,8 +15,8 @@ const I18N = {
         adjustTitle: "Tailor Adjustment",
         highWaist: "High",
         lowWaist: "Low",
-        tiltFB: "Front/Back Tilt (Theta: ",
-        tiltLR: "Left/Right Tilt (Phi: ",
+        tiltFB: "Front/Back Tilt",
+        tiltLR: "Left/Right Tilt",
         resetBtn: "Reset",
         resetTooltip: "Reset all sliders to default",
         changeColorTooltip: "Change color",
@@ -33,12 +33,20 @@ const I18N = {
         rightTitle: "Right Side",
         originalTag: "Original",
         cloneTag: "Symmetric clone",
-        defaultMarkerTooltip: "Click to reset this slider to default value",
+        defaultMarkerTooltip: "Click to reset this slider",
         customMarkerTooltip: "Custom marker (click to apply)",
         fullscreenTooltip: "Toggle Fullscreen (F11 / Esc)",
-        langTooltip: "Switch Language (EN / FR)",
+        langTooltip: "Switch Language",
         infoAvailable: "Description available",
-        editableMeas: "Adjustable measurement"
+        editableMeas: "Adjustable measurement",
+        helpTitle: "Viewer Controls",
+        helpOrbit: "Left click & drag: Orbit view",
+        helpPan: "Right click & drag: Pan view",
+        helpSelect: "Click on legend: Select measurement",
+        helpInfo: "Additional description available",
+        helpEdit: "Measurement adjustable via sliders",
+        valMax: "Maximum :",
+        valMin: "Minimum :"
     },
     fr: {
         loading: "Chargement du mod\u00e8le...",
@@ -51,8 +59,8 @@ const I18N = {
         adjustTitle: "Ajustement Tailleur",
         highWaist: "Taille haute",
         lowWaist: "Taille basse",
-        tiltFB: "Inclinaison Avant/Arri\u00e8re (Theta : ",
-        tiltLR: "Inclinaison Gauche/Droite (Phi : ",
+        tiltFB: "Inclinaison AV/AR",
+        tiltLR: "Inclinaison G/D",
         resetBtn: "Reset",
         resetTooltip: "Revenir aux valeurs par d\u00e9faut",
         changeColorTooltip: "Changer la couleur",
@@ -69,39 +77,109 @@ const I18N = {
         rightTitle: "C\u00f4t\u00e9 Droit",
         originalTag: "Original",
         cloneTag: "Clone sym\u00e9trique",
-        defaultMarkerTooltip: "Cliquer pour r\u00e9initialiser ce curseur \u00e0 sa valeur par d\u00e9faut",
+        defaultMarkerTooltip: "Cliquer pour r\u00e9initialiser",
         customMarkerTooltip: "Marqueur perso (cliquer pour appliquer)",
         fullscreenTooltip: "Plein \u00e9cran (F11 / \u00c9chap)",
-        langTooltip: "Changer de langue (EN / FR)",
+        langTooltip: "Changer de langue",
         infoAvailable: "Description disponible",
-        editableMeas: "Mesure ajustable"
+        editableMeas: "Mesure ajustable",
+        helpTitle: "Contr\u00f4les du Viewer",
+        helpOrbit: "Clic gauche enfonc\u00e9 : Tourner la vue",
+        helpPan: "Clic droit enfonc\u00e9 : D\u00e9placer la vue (Pan)",
+        helpSelect: "Clic sur l\u00e9gende : S\u00e9lectionner la mesure",
+        helpInfo: "Information additionnelle disponible",
+        helpEdit: "Mesure ajustable via les curseurs",
+        valMax: "Maximum :",
+        valMin: "Minimum :"
+    },
+    es: {
+        loading: "Cargando modelo...",
+        errorPrefix: "Error: ",
+        missingPaths: "Falta modelo o datos.",
+        cannotReadJson: "No se puede leer results.json",
+        modelNotFound: "Modelo no encontrado. Cargando predeterminado...",
+        criticalError: "Error cr\u00edtico: Modelo predeterminado no encontrado.",
+        measurementsTitle: "Medidas",
+        adjustTitle: "Ajuste de Sastre",
+        highWaist: "Cintura alta",
+        lowWaist: "Cintura baja",
+        tiltFB: "Inclinaci\u00f3n Ade/Atr",
+        tiltLR: "Inclinaci\u00f3n Izq/Der",
+        resetBtn: "Reset",
+        resetTooltip: "Restablecer los valores",
+        changeColorTooltip: "Cambiar color",
+        toggleGroupTooltip: "Mostrar / Ocultar grupo",
+        toggleSingleTooltip: "Mostrar / Ocultar medida",
+        toggleAllTooltip: "Mostrar / Ocultar todo",
+        filterTooltip: "Filtro Izquierdo / Derecho / Defecto",
+        defaultFilter: "Defecto",
+        leftOnly: "L Solo",
+        rightOnly: "R Solo",
+        leftShort: "L",
+        rightShort: "R",
+        leftTitle: "Lado Izquierdo",
+        rightTitle: "Lado Derecho",
+        originalTag: "Original",
+        cloneTag: "Clon sim\u00e9trico",
+        defaultMarkerTooltip: "Haga clic para restablecer",
+        customMarkerTooltip: "Marcador (clic para aplicar)",
+        fullscreenTooltip: "Pantalla completa (F11 / Esc)",
+        langTooltip: "Cambiar idioma",
+        infoAvailable: "Descripci\u00f3n disponible",
+        editableMeas: "Medida ajustable",
+        helpTitle: "Controles del Visor",
+        helpOrbit: "Clic izquierdo presionado: Girar vista",
+        helpPan: "Clic derecho presionado: Mover vista",
+        helpSelect: "Clic en leyenda: Seleccionar medida",
+        helpInfo: "Informaci\u00f3n adicional disponible",
+        helpEdit: "Medida ajustable mediante controles deslizantes",
+        valMax: "M\u00e1ximo :",
+        valMin: "M\u00ednimo :"
+    },
+    de: {
+        loading: "Modell wird geladen...",
+        errorPrefix: "Fehler: ",
+        missingPaths: "Fehlendes Modell oder Daten.",
+        cannotReadJson: "results.json kann nicht gelesen werden",
+        modelNotFound: "Modell nicht gefunden. Standardmodell wird geladen...",
+        criticalError: "Kritischer Fehler: Standardmodell nicht gefunden.",
+        measurementsTitle: "Messungen",
+        adjustTitle: "Schneideranpassung",
+        highWaist: "Hohe Taille",
+        lowWaist: "Tiefe Taille",
+        tiltFB: "Neigung Vor/Zur\u00fcck",
+        tiltLR: "Neigung Links/Rechts",
+        resetBtn: "Reset",
+        resetTooltip: "Werte zur\u00fccksetzen",
+        changeColorTooltip: "Farbe \u00e4ndern",
+        toggleGroupTooltip: "Gruppe umschalten",
+        toggleSingleTooltip: "Messung umschalten",
+        toggleAllTooltip: "Alle umschalten",
+        filterTooltip: "Filter Links / Rechts / Standard",
+        defaultFilter: "Standard",
+        leftOnly: "Nur L",
+        rightOnly: "Nur R",
+        leftShort: "L",
+        rightShort: "R",
+        leftTitle: "Linke Seite",
+        rightTitle: "Rechte Seite",
+        originalTag: "Original",
+        cloneTag: "Symmetrischer Klon",
+        defaultMarkerTooltip: "Klicken, um zur\u00fcckzusetzen",
+        customMarkerTooltip: "Eigener Marker (klicken zum Anwenden)",
+        fullscreenTooltip: "Vollbild (F11 / Esc)",
+        langTooltip: "Sprache \u00e4ndern",
+        infoAvailable: "Beschreibung verf\u00fcgbar",
+        editableMeas: "Anpassbare Messung",
+        helpTitle: "Ansichtssteuerung",
+        helpOrbit: "Linksklick halten: Ansicht drehen",
+        helpPan: "Rechtsklick halten: Ansicht verschieben",
+        helpSelect: "Klick auf Legende: Messung ausw\u00e4hlen",
+        helpInfo: "Zus\u00e4tzliche Beschreibung verf\u00fcgbar",
+        helpEdit: "Messung \u00fcber Schieberegler anpassbar",
+        valMax: "Maximum :",
+        valMin: "Minimum :"
     }
-};
-
-// Built-in translation fallback for standard tailoring measurement names
-const MEAS_NAME_DICT = {
-    "tour de poitrine": { fr: "Tour de poitrine", en: "Chest Girth" },
-    "tour de ceinture": { fr: "Tour de ceinture", en: "Waistband Girth" },
-    "tour de cou": { fr: "Tour de cou", en: "Neck Girth" },
-    "tour d'emmanchure": { fr: "Tour d'emmanchure", en: "Armscye Girth" },
-    "tour de poignet": { fr: "Tour de poignet", en: "Wrist Girth" },
-    "tour de mollet": { fr: "Tour de mollet", en: "Calf Girth" },
-    "largeur du dos": { fr: "Largeur du dos", en: "Cross Back Width" },
-    "aplomb epaule-poitrine-bassin": { fr: "Aplomb \u00e9paule-poitrine-bassin", en: "Shoulder-Chest-Pelvis Plumb" },
-    "aplomb \u00e9paule-poitrine-bassin": { fr: "Aplomb \u00e9paule-poitrine-bassin", en: "Shoulder-Chest-Pelvis Plumb" },
-    "largeur d'\u00e9paules": { fr: "Largeur d'\u00e9paules", en: "Shoulder Width" },
-    "largeur d'epaules": { fr: "Largeur d'\u00e9paules", en: "Shoulder Width" },
-    "longueur de manche": { fr: "Longueur de manche", en: "Sleeve Length" },
-    "tour de bras": { fr: "Tour de bras", en: "Upper Arm Girth" },
-    "tour de hanches": { fr: "Tour de hanches", en: "Hip Girth" },
-    "demi-longueur d'\u00e9paule": { fr: "Demi-longueur d'\u00e9paule", en: "Half Shoulder Length" },
-    "demi-longueur d'epaule": { fr: "Demi-longueur d'\u00e9paule", en: "Half Shoulder Length" },
-    "aplomb cervicale c7-sol": { fr: "Aplomb cervicale C7-sol", en: "C7-to-Floor Plumb" },
-    "longueur de jambe int\u00e9rieure": { fr: "Longueur de jambe int\u00e9rieure", en: "Inseam Length" },
-    "longueur de jambe interieure": { fr: "Longueur de jambe int\u00e9rieure", en: "Inseam Length" },
-    "longueur de jambe ext\u00e9rieure": { fr: "Longueur de jambe ext\u00e9rieure", en: "Outseam Length" },
-    "longueur de jambe exterieure": { fr: "Longueur de jambe ext\u00e9rieure", en: "Outseam Length" },
-    "tour de taille": { fr: "Tour de taille", en: "Waist Girth" }
 };
 
 const SVG_EYE_OPEN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
@@ -124,13 +202,16 @@ class MeasurementViewer {
             this.currentModelName = this.objPath || '';
         }
 
-        // Point 6: English by default
-        this.lang = urlParams.get('lang') || 'en';
+        this.availableLangs = Object.keys(I18N);
+        const reqLang = urlParams.get('lang') || 'en';
+        this.lang = this.availableLangs.includes(reqLang) ? reqLang : 'en';
         this.theme = urlParams.get('theme') || 'dark';
 
         this.resultsData = null;
+        this.templateMap = new Map();
         this.activeMeasurements = [];
         this.selectedMeasurement = null;
+        this.hoveredSprite = null;
 
         this.container = document.getElementById('canvas-container');
         this.canvasHud = document.getElementById('hud-canvas');
@@ -142,7 +223,6 @@ class MeasurementViewer {
         this.sliderTheta = document.getElementById('slider-theta');
         this.sliderPhi = document.getElementById('slider-phi');
 
-        this.injectCustomStyles();
         this.setupTopLeftUI();
         this.setupMergedBottomLeftPanel();
 
@@ -163,212 +243,7 @@ class MeasurementViewer {
         return dict[key] || I18N.en[key] || key;
     }
 
-    injectCustomStyles() {
-        if (document.getElementById('tailor-injected-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'tailor-injected-styles';
-        style.textContent = `
-            :root {
-                --bg: #1F2123 !important;
-                --bg-grad: none !important;
-            }
-            body, #loading-overlay {
-                background: #1F2123 !important;
-            }
-            /* Point 8: Widen right panel and compact items to fit on 1 line without scrollbar */
-            #right-panel {
-                width: 430px !important;
-                max-width: calc(100vw - 40px);
-            }
-            #legend-content {
-                padding: 8px 10px !important;
-            }
-            .legend-item {
-                margin-bottom: 5px !important;
-                padding: 7px 12px !important;
-            }
-            .visibility-toggle {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                color: #e6e8ec;
-                opacity: 0.75;
-                transition: opacity 0.2s;
-            }
-            .visibility-toggle:hover {
-                opacity: 1;
-            }
-            .visibility-toggle.off {
-                opacity: 0.35;
-            }
-            /* Points 11 & 12: Round grey L/R buttons and tight spacing */
-            .lr-inline-container {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .lr-side-unit {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                padding: 2px 5px;
-                border-radius: 6px;
-                border: 1px solid transparent;
-                transition: all 0.15s;
-                cursor: pointer;
-            }
-            .lr-side-unit:hover {
-                background: rgba(255, 255, 255, 0.06);
-            }
-            .lr-side-unit.active-edit {
-                background: rgba(78, 168, 222, 0.2);
-                border-color: var(--accent);
-            }
-            .lr-side-unit.side-hidden {
-                opacity: 0.35;
-            }
-            .lr-round-btn {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: #5a6069;
-                color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                font-size: 10px;
-                font-weight: 700;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                padding: 0;
-                line-height: 1;
-                flex-shrink: 0;
-                transition: background 0.15s, transform 0.1s;
-            }
-            .lr-round-btn:hover {
-                transform: scale(1.08);
-                background: #737a85;
-            }
-            .lr-round-btn.checked {
-                background: #6c737d;
-                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
-            }
-            .lr-val-span {
-                font-size: 13px;
-                white-space: nowrap;
-            }
-            /* Points 4, 6, 7: Top-left bar */
-            #top-left-bar {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                z-index: 30;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                pointer-events: auto;
-            }
-            .top-left-Controls {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .top-ui-btn {
-                background: rgba(22, 24, 28, 0.85);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                color: #e6e8ec;
-                border-radius: 8px;
-                padding: 6px 11px;
-                font-size: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                backdrop-filter: blur(8px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-                transition: background 0.2s, border-color 0.2s;
-            }
-            .top-ui-btn:hover {
-                background: rgba(255, 255, 255, 0.12);
-                border-color: rgba(255, 255, 255, 0.3);
-            }
-            #model-identity-badge {
-                background: rgba(22, 24, 28, 0.85);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 13px;
-                font-weight: 600;
-                color: #e6e8ec;
-                backdrop-filter: blur(8px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-                white-space: nowrap;
-            }
-            /* Point 15: Merged Info + Adjustment panel with thin orange/gold border */
-            #controls-panel {
-                background: rgba(22, 24, 28, 0.92) !important;
-                border: 1px solid rgba(255, 180, 0, 0.55) !important;
-                border-radius: 10px !important;
-                padding: 15px !important;
-                width: 380px !important;
-                max-width: calc(100vw - 40px);
-                backdrop-filter: blur(10px);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
-            }
-            #merged-desc-divider {
-                border: 0;
-                height: 1px;
-                background: rgba(255, 255, 255, 0.12);
-                margin: 12px 0;
-            }
-            /* Point 16: Default reset marker placed BELOW the horizontal slider track */
-            .slider-track-wrapper.horiz {
-                height: 32px !important;
-                padding-bottom: 6px;
-            }
-            .marker.horizontal-m {
-                top: auto !important;
-                bottom: 0px !important;
-                width: 4px !important;
-                height: 10px !important;
-                border-radius: 2px;
-                z-index: 15;
-            }
-            .marker.vertical-m {
-                left: auto !important;
-                right: 0px !important;
-                width: 10px !important;
-                height: 4px !important;
-                border-radius: 2px;
-                z-index: 15;
-            }
-            .marker.default-marker {
-                background: #4ea8de !important;
-                box-shadow: 0 0 4px rgba(78, 168, 222, 0.8);
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
     setupTopLeftUI() {
-        let bar = document.getElementById('top-left-bar');
-        if (!bar) {
-            bar = document.createElement('div');
-            bar.id = 'top-left-bar';
-            bar.innerHTML = `
-                <div class="top-left-Controls">
-                    <button id="btn-lang-switch" class="top-ui-btn" title="${this.t('langTooltip')}"></button>
-                    <button id="btn-fullscreen-toggle" class="top-ui-btn" title="${this.t('fullscreenTooltip')}">
-                        ${SVG_FULLSCREEN_ENTER}
-                    </button>
-                </div>
-                <div id="model-identity-badge"></div>
-            `;
-            document.body.appendChild(bar);
-        }
-
         this.langBtn = document.getElementById('btn-lang-switch');
         this.fullscreenBtn = document.getElementById('btn-fullscreen-toggle');
         this.identityBadge = document.getElementById('model-identity-badge');
@@ -378,7 +253,8 @@ class MeasurementViewer {
 
         if (this.langBtn) {
             this.langBtn.addEventListener('click', () => {
-                this.lang = this.lang === 'en' ? 'fr' : 'en';
+                const currentIndex = this.availableLangs.indexOf(this.lang);
+                this.lang = this.availableLangs[(currentIndex + 1) % this.availableLangs.length];
                 document.documentElement.lang = this.lang;
                 this.updateLangButtonLabel();
                 this.applyLanguageToDOM();
@@ -394,24 +270,30 @@ class MeasurementViewer {
                 this.fullscreenBtn.innerHTML = document.fullscreenElement ? SVG_FULLSCREEN_EXIT : SVG_FULLSCREEN_ENTER;
             }
         });
+
+        const helpBtn = document.getElementById('btn-help-toggle');
+        const helpModal = document.getElementById('help-modal');
+        if (helpBtn && helpModal) {
+            helpBtn.addEventListener('click', () => helpModal.classList.toggle('hidden'));
+        }
     }
 
     updateLangButtonLabel() {
         if (!this.langBtn) return;
-        if (this.lang === 'en') {
-            this.langBtn.innerHTML = `<span style="color:#ffd700;">EN</span> <span style="opacity:0.4;">|</span> <span style="opacity:0.6;">FR</span>`;
-        } else {
-            this.langBtn.innerHTML = `<span style="opacity:0.6;">EN</span> <span style="opacity:0.4;">|</span> <span style="color:#ffd700;">FR</span>`;
-        }
+        const htmlParts = this.availableLangs.map(l => {
+            if (l === this.lang) return `<span style="color:#ffd700;">${l.toUpperCase()}</span>`;
+            return `<span style="opacity:0.6;">${l.toUpperCase()}</span>`;
+        });
+        this.langBtn.innerHTML = htmlParts.join(' <span style="opacity:0.4;">&nbsp;|&nbsp;</span> ');
     }
 
-    // Point 7: Format model identity as "Type Gender - Height cm"
     updateModelIdentityDisplay(rawModelString) {
         if (!this.identityBadge || !rawModelString) return;
         const clean = rawModelString.replace(/^.*[\\/]/, '').replace(/\.[^/.]+$/, '');
         const match = clean.match(/^(.+)_(man|woman)_(\d+)$/i);
         if (match) {
-            const rawType = match[1].split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+            let rawType = match[1].split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+            if (rawType.toLowerCase() === 'obese') rawType = 'Plus Size';
             const rawGender = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
             const rawHeight = match[3];
             this.identityBadge.textContent = `${rawType} ${rawGender} - ${rawHeight} cm`;
@@ -424,92 +306,76 @@ class MeasurementViewer {
 
     toggleFullscreen() {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.warn("Fullscreen request failed:", err);
-            });
+            document.documentElement.requestFullscreen().catch(err => console.warn(err));
         } else if (document.exitFullscreen) {
             document.exitFullscreen();
         }
     }
 
-    // Point 15: Merge Info panel and Edit controls inside #controls-panel
     setupMergedBottomLeftPanel() {
         if (!this.controlsPanel) return;
 
-        // Wrap existing children of #controls-panel into #merged-edit-section
-        this.editSection = document.createElement('div');
-        this.editSection.id = 'merged-edit-section';
-        while (this.controlsPanel.firstChild) {
-            this.editSection.appendChild(this.controlsPanel.firstChild);
-        }
+        this.editSectionLayout = this.controlsPanel.querySelector('.sliders-layout');
 
-        // Create Info section at the top of #controls-panel
         this.descSection = document.createElement('div');
         this.descSection.id = 'merged-desc-section';
         this.descSection.style.display = 'none';
         this.descSection.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-                <span style="color: #ffd700; font-weight: bold; border: 2px solid #ffd700; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 12px; flex-shrink: 0;">i</span>
+                <span style="color: #ffd700; font-weight: bold; border: 2px solid #ffd700; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; flex-shrink: 0;">i</span>
                 <strong id="desc-panel-title" style="font-size: 14px; color: #ffd700;"></strong>
             </div>
             <div id="desc-panel-content" style="font-size: 13px; line-height: 1.45; color: #ddd;"></div>
         `;
 
-        // Create subtle grey horizontal separator
         this.mergedDivider = document.createElement('hr');
         this.mergedDivider.id = 'merged-desc-divider';
+        this.mergedDivider.style.border = '0';
+        this.mergedDivider.style.height = '1px';
+        this.mergedDivider.style.background = 'rgba(255, 255, 255, 0.12)';
+        this.mergedDivider.style.margin = '12px 0';
         this.mergedDivider.style.display = 'none';
 
-        this.controlsPanel.appendChild(this.descSection);
-        this.controlsPanel.appendChild(this.mergedDivider);
-        this.controlsPanel.appendChild(this.editSection);
+        this.controlsPanel.insertBefore(this.mergedDivider, this.controlsPanel.firstChild);
+        this.controlsPanel.insertBefore(this.descSection, this.mergedDivider);
     }
 
     getLocalizedName(rawKey, data) {
         if (data && data.name && typeof data.name === 'object') {
-            return data.name[this.lang] || data.name.en || data.name.fr || rawKey.replace(/_/g, ' ');
+            return data.name[this.lang] || data.name.en || rawKey.replace(/_/g, ' ');
         }
-        const baseKey = (data && typeof data.name === 'string' ? data.name : rawKey).replace(/_/g, ' ').trim();
-        const lookup = MEAS_NAME_DICT[baseKey.toLowerCase()];
-        if (lookup) {
-            return lookup[this.lang] || lookup.en || baseKey;
-        }
-        return baseKey;
+        return rawKey.replace(/_/g, ' ');
     }
 
     getLocalizedDesc(data) {
         if (!data || !data.description) return "";
         if (typeof data.description === 'object') {
-            return (data.description[this.lang] || data.description.en || data.description.fr || "").trim();
+            return (data.description[this.lang] || data.description.en || "").trim();
         }
         return String(data.description).trim();
     }
 
     applyLanguageToDOM() {
-        const titleEl = document.querySelector('.legend-header h2');
-        if (titleEl) titleEl.textContent = this.t('measurementsTitle');
-
-        const adjustHeaderEl = this.editSection ? this.editSection.querySelector('.controls-header h4') : null;
-        if (adjustHeaderEl) adjustHeaderEl.textContent = this.t('adjustTitle');
-
-        const btnReset = document.getElementById('btn-reset-slider');
-        if (btnReset) {
-            btnReset.textContent = `\u21ba ${this.t('resetBtn')}`;
-            btnReset.title = this.t('resetTooltip');
-        }
-
-        if (this.editSection) {
-            const vLabels = this.editSection.querySelectorAll('.vertical-slider-container .slider-label');
-            if (vLabels.length >= 2) {
-                vLabels[0].textContent = this.t('highWaist');
-                vLabels[1].textContent = this.t('lowWaist');
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.textContent = this.t(el.getAttribute('data-i18n'));
+        });
+        
+        document.querySelectorAll('[title]').forEach(el => {
+            if (el.hasAttribute('data-i18n-title')) {
+                el.title = this.t(el.getAttribute('data-i18n-title'));
             }
-            const hGroups = this.editSection.querySelectorAll('.horiz-group .slider-label');
+        });
+
+        if (this.controlsPanel) {
+            const btnReset = document.getElementById('btn-reset-slider');
+            if (btnReset) btnReset.title = this.t('resetTooltip');
+            
+            const hGroups = this.controlsPanel.querySelectorAll('.horiz-group .slider-label');
             if (hGroups.length >= 2) {
                 const curTh = this.sliderTheta ? parseFloat(this.sliderTheta.value) : 0;
                 const curPh = this.sliderPhi ? parseFloat(this.sliderPhi.value) : 0;
-                hGroups[0].innerHTML = `${this.t('tiltFB')}<strong id="label-val-theta" style="color: var(--accent);">${curTh > 0 ? '+' : ''}${curTh.toFixed(1)}\u00b0</strong>)`;
-                hGroups[1].innerHTML = `${this.t('tiltLR')}<strong id="label-val-phi" style="color: var(--accent);">${curPh > 0 ? '+' : ''}${curPh.toFixed(1)}\u00b0</strong>)`;
+                hGroups[0].innerHTML = `<span data-i18n="tiltFB">${this.t('tiltFB')}</span> (Theta: <strong id="label-val-theta" style="color: var(--accent);">${curTh > 0 ? '+' : ''}${curTh.toFixed(1)}°</strong>)`;
+                hGroups[1].innerHTML = `<span data-i18n="tiltLR">${this.t('tiltLR')}</span> (Phi: <strong id="label-val-phi" style="color: var(--accent);">${curPh > 0 ? '+' : ''}${curPh.toFixed(1)}°</strong>)`;
             }
         }
 
@@ -519,14 +385,12 @@ class MeasurementViewer {
             this.sideToggleBtn.title = this.t('filterTooltip');
         }
 
-        // Update measurement names in legend
         this.activeMeasurements.forEach(mObj => {
             if (mObj.nameSpan) {
                 mObj.nameSpan.textContent = this.getLocalizedName(mObj.groupKey || mObj.id, mObj.rawData);
             }
         });
 
-        // Refresh open description/adjustment panel if a measurement is selected
         if (this.selectedMeasurement) {
             this.updateMergedPanelContent(this.selectedMeasurement);
             this.renderMarkers(this.selectedMeasurement);
@@ -540,20 +404,12 @@ class MeasurementViewer {
         this.setupControls();
         this.setupEvents();
         this.setupSliderEvents();
-        this.applyLanguageToDOM();
-
-        const loadData = async (obj, json) => {
-            await this.loadAvatar(obj);
-            await this.loadMeasurements(json);
-            this.frameModelFullHeight();
-        };
 
         try {
             if (!this.objPath || !this.jsonPath) throw new Error(this.t('missingPaths'));
-            await loadData(this.objPath, this.jsonPath);
+            await this.loadData(this.objPath, this.jsonPath);
         } catch (error) {
             console.warn("Requested model failed, loading fallback model...", error);
-            this.showToast(this.t('modelNotFound'), true);
             
             const toRemove = [...this.avatarGroup.children, ...this.measurementsGroup.children];
             toRemove.forEach(c => {
@@ -570,7 +426,7 @@ class MeasurementViewer {
             try {
                 this.currentModelName = 'average_man_182';
                 this.updateModelIdentityDisplay(this.currentModelName);
-                await loadData('models/average_man_182.obj', 'measurements/average_man_182.json');
+                await this.loadData('models/average_man_182.obj', 'measurements/average_man_182.json');
             } catch (fallbackError) {
                 const errEl = document.getElementById('loading-text');
                 if (errEl) errEl.textContent = this.t('criticalError');
@@ -583,10 +439,11 @@ class MeasurementViewer {
             overlay.style.opacity = '0';
             setTimeout(() => overlay.style.display = 'none', 500);
         }
+        
+        this.applyLanguageToDOM();
         this.animate();
     }
 
-    // Point 3: Fit 3D model to full viewport height with ~0.5 cm top and bottom margin
     frameModelFullHeight() {
         this.avatarGroup.updateMatrixWorld(true);
         const box = new THREE.Box3().setFromObject(this.avatarGroup);
@@ -597,7 +454,6 @@ class MeasurementViewer {
         box.getSize(size);
         box.getCenter(center);
 
-        // 0.5 cm at standard 96 DPI is ~19 pixels top and 19 pixels bottom
         const marginPx = 19;
         const viewHeight = Math.max(window.innerHeight, 200);
         const usableHeightFraction = Math.max(0.5, (viewHeight - 2 * marginPx) / viewHeight);
@@ -614,35 +470,8 @@ class MeasurementViewer {
         this.controls.update();
     }
 
-    showToast(message, isError = false) {
-        const toast = document.createElement('div');
-        toast.style.position = 'absolute';
-        toast.style.top = '20px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.padding = '12px 24px';
-        toast.style.background = isError ? 'rgba(220, 53, 69, 0.95)' : 'rgba(78, 168, 222, 0.95)';
-        toast.style.color = '#fff';
-        toast.style.borderRadius = '8px';
-        toast.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-        toast.style.fontSize = '14px';
-        toast.style.fontWeight = 'bold';
-        toast.style.zIndex = '9999';
-        toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        toast.style.backdropFilter = 'blur(10px)';
-        toast.style.transition = 'opacity 0.3s ease-in-out';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
     applyTheme() {
         document.documentElement.setAttribute('data-theme', this.theme);
-        // Point 1: Solid #1F2123 background
         this.scene.background = new THREE.Color('#1F2123');
     }
 
@@ -680,13 +509,42 @@ class MeasurementViewer {
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Point 4: F11 and Escape keyboard shortcuts for fullscreen
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F11') {
                 e.preventDefault();
                 this.toggleFullscreen();
             } else if (e.key === 'Escape' && document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen();
+            }
+        });
+
+        this.renderer.domElement.addEventListener('pointermove', (e) => {
+            this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const spriteObjects = [];
+            this.activeMeasurements.forEach(m => {
+                if (m.isVisible && m.iconGroup) {
+                    m.iconGroup.children.forEach(s => {
+                        if (s !== m.lengthSprite && s.visible) spriteObjects.push(s);
+                    });
+                }
+            });
+
+            const intersects = this.raycaster.intersectObjects(spriteObjects, false);
+            let hitSprite = intersects.length > 0 ? intersects[0].object : null;
+
+            if (this.hoveredSprite && this.hoveredSprite !== hitSprite) {
+                this.hoveredSprite.scale.copy(this.hoveredSprite.userData.originalScale);
+                document.body.style.cursor = 'default';
+                this.hoveredSprite = null;
+            }
+
+            if (hitSprite) {
+                this.hoveredSprite = hitSprite;
+                hitSprite.scale.copy(hitSprite.userData.originalScale).multiplyScalar(1.15);
+                document.body.style.cursor = 'pointer';
             }
         });
 
@@ -700,18 +558,14 @@ class MeasurementViewer {
             const distance = this.pointerDownPos.distanceTo(new THREE.Vector2(e.clientX, e.clientY));
             if (distance > 5) return; 
 
-            this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            this.raycaster.setFromCamera(this.mouse, this.camera);
-
             const selectableObjects = [];
             this.activeMeasurements.forEach(m => {
                 if (m.isVisible) {
                     selectableObjects.push(m.tube);
                     if (m.iconGroup) {
-                        m.iconGroup.children.forEach(sprite => {
-                            if (sprite !== m.lengthSprite && sprite.visible) {
-                                selectableObjects.push(sprite);
+                        m.iconGroup.children.forEach(s => {
+                            if (s !== m.lengthSprite && s.visible) {
+                                selectableObjects.push(s);
                             }
                         });
                     }
@@ -743,8 +597,8 @@ class MeasurementViewer {
             
             const lblTh = document.getElementById('label-val-theta');
             const lblPh = document.getElementById('label-val-phi');
-            if (lblTh) lblTh.textContent = `${th_val > 0 ? '+' : ''}${th_val.toFixed(1)}\u00b0`;
-            if (lblPh) lblPh.textContent = `${ph_val > 0 ? '+' : ''}${ph_val.toFixed(1)}\u00b0`;
+            if (lblTh) lblTh.textContent = `${th_val > 0 ? '+' : ''}${th_val.toFixed(1)}°`;
+            if (lblPh) lblPh.textContent = `${ph_val > 0 ? '+' : ''}${ph_val.toFixed(1)}°`;
             
             this.applyInterpolatedMeasurement(this.selectedMeasurement, t_val, th_val, ph_val);
         };
@@ -759,21 +613,6 @@ class MeasurementViewer {
                 if (this.selectedMeasurement) this.resetToDefaultGrid(this.selectedMeasurement);
             });
         }
-    }
-
-    loadAvatar(path) {
-        return new Promise((resolve, reject) => {
-            const loader = new OBJLoader();
-            const matBody = new THREE.MeshStandardMaterial({ 
-                color: 0x6c6c6c, roughness: 0.6, metalness: 0.2, side: THREE.DoubleSide 
-            });
-            
-            loader.load(path, (object) => {
-                object.traverse((child) => { if (child.isMesh) child.material = matBody; });
-                this.avatarGroup.add(object);
-                resolve();
-            }, undefined, reject);
-        });
     }
 
     updateSideToggleStates() {
@@ -806,7 +645,6 @@ class MeasurementViewer {
         header.appendChild(container);
 
         const sideToggle = document.createElement('div');
-        sideToggle.title = this.t('filterTooltip');
         sideToggle.style.cursor = 'pointer';
         sideToggle.style.fontWeight = 'bold';
         sideToggle.style.fontSize = '11px';
@@ -846,10 +684,8 @@ class MeasurementViewer {
         });
         container.appendChild(sideToggle);
 
-        // Point 10: SVG Eye icon for global visibility
         const eyeToggle = document.createElement('div');
         eyeToggle.className = 'visibility-toggle';
-        eyeToggle.title = this.t('toggleAllTooltip');
         eyeToggle.style.cursor = 'pointer';
         eyeToggle.innerHTML = SVG_EYE_OPEN;
 
@@ -870,16 +706,45 @@ class MeasurementViewer {
         container.appendChild(eyeToggle);
     }
 
-    async loadMeasurements(path) {
-        const response = await fetch(path);
-        if (!response.ok) throw new Error(this.t('cannotReadJson'));
-        const data = await response.json();
+    async loadData(objPath, jsonPath) {
+        const [templateRes, modelRes] = await Promise.all([
+            fetch('./master_measurements_template.json').catch(() => null),
+            fetch(jsonPath)
+        ]);
+
+        if (templateRes && templateRes.ok) {
+            const templateData = await templateRes.json();
+            templateData.measurements.forEach(m => this.templateMap.set(m.id, m));
+        }
+        
+        const data = await modelRes.json();
+        
+        for (const [name, measData] of Object.entries(data.measurements_results)) {
+            const tpl = this.templateMap.get(name);
+            if (tpl) {
+                measData.name = tpl.name;
+                measData.description = tpl.description;
+                if (tpl.slicer_parameters) measData.template_params = tpl.slicer_parameters;
+            }
+        }
+
         this.resultsData = data;
         
         if (data.height_overridden && data.global_scale) {
             const s = data.global_scale;
             this.avatarGroup.scale.set(s, s, s);
         }
+
+        await new Promise((resolve, reject) => {
+            new OBJLoader().load(objPath, (object) => {
+                const matBody = new THREE.MeshStandardMaterial({ color: 0x6c6c6c, roughness: 0.6, metalness: 0.2, side: THREE.DoubleSide });
+                object.traverse((child) => { if (child.isMesh) child.material = matBody; });
+                this.avatarGroup.add(object);
+                resolve();
+            }, undefined, reject);
+        });
+
+        this.frameModelFullHeight();
 
         const groups = new Map();
         for (const [name, measData] of Object.entries(data.measurements_results)) {
@@ -900,211 +765,123 @@ class MeasurementViewer {
 
     build3DTubeForMeasurement(name, data) {
         if (!data.path_3d || data.path_3d.length < 2) return null;
+        let points = data.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
         
-        const points = data.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
-        
-        let hexColor = 0xff3333;
-        if (data.type === 'tape') hexColor = 0x00ffcc;
-        if (data.type === 'slicer') hexColor = 0xffaa00;
-        if (data.type === 'plumb' || data.type === 'caliper') hexColor = 0xcc33ff;
+        let hexColor = data.type === 'tape' ? 0x00ffcc : (data.type === 'slicer' ? 0xffaa00 : 0xcc33ff);
+        if(!data.type) hexColor = 0xff3333;
         const cssColor = '#' + hexColor.toString(16).padStart(6, '0');
         
-        let isClosed = data.is_closed_loop === true || data.is_closed === true;
-        if (data.type === 'slicer') isClosed = true;
-        
+        let isClosed = data.is_closed_loop || data.is_closed || data.type === 'slicer';
         if (points.length > 2) {
             const dist = points[0].distanceTo(points[points.length - 1]);
-            if (dist < 0.04) {
-                isClosed = true;
-            }
-            if (isClosed && dist < 0.02) {
-                points.pop(); 
-            }
+            if (dist < 0.04) isClosed = true;
+            if (isClosed && dist < 0.02) points.pop();
         }
 
         const curve = new THREE.CatmullRomCurve3(points, isClosed, 'catmullrom', 0);
-        
-        let radius = 0.0035;
-        let haloRadius = 0.007;
-        if (data.type === 'plumb' || data.type === 'caliper') {
-            radius = 0.002;
-            haloRadius = 0.005;
-        }
+        const radius = (data.type === 'plumb' || data.type === 'caliper') ? 0.002 : 0.0035;
+        const haloRadius = (data.type === 'plumb' || data.type === 'caliper') ? 0.005 : 0.007;
+
+        const defaultVisible = data.default_visible !== false;
 
         const tubeGeo = new THREE.TubeGeometry(curve, points.length * 4, radius, 8, isClosed);
-        const haloGeo = new THREE.TubeGeometry(curve, points.length * 4, haloRadius, 8, isClosed);
-
-        const defaultVisible = data.default_visible !== undefined ? data.default_visible : true;
-
-        const materialLine = new THREE.MeshBasicMaterial({ 
-            color: hexColor, 
-            depthTest: true, 
-            polygonOffset: true, 
-            polygonOffsetFactor: -4, 
-            polygonOffsetUnits: -4, 
-            side: THREE.DoubleSide 
-        });
-
-        const tubeMesh = new THREE.Mesh(tubeGeo, materialLine);
-        tubeMesh.renderOrder = 1;
-        tubeMesh.visible = defaultVisible;
+        const tubeMesh = new THREE.Mesh(tubeGeo, new THREE.MeshBasicMaterial({ color: hexColor, depthTest: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, side: THREE.DoubleSide }));
+        tubeMesh.renderOrder = 1; tubeMesh.visible = defaultVisible;
         this.measurementsGroup.add(tubeMesh);
 
-        const haloMesh = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ 
-            color: hexColor, transparent: true, opacity: 0.35, depthTest: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide 
-        }));
-        haloMesh.visible = false;
-        haloMesh.renderOrder = 2;
+        const haloMesh = new THREE.Mesh(new THREE.TubeGeometry(curve, points.length * 4, haloRadius, 8, isClosed), new THREE.MeshBasicMaterial({ color: hexColor, transparent: true, opacity: 0.35, depthTest: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+        haloMesh.visible = false; haloMesh.renderOrder = 2;
         this.measurementsGroup.add(haloMesh);
 
-        let ghostMin = null;
-        let ghostMax = null;
-
+        let ghostMin = null, ghostMax = null;
         if (data.path_min && data.path_min.length >= 2) {
             const minPts = data.path_min.map(p => new THREE.Vector3(p[0], p[1], p[2]));
             if (minPts.length > 2 && minPts[0].distanceTo(minPts[minPts.length - 1]) < 0.005) minPts.pop();
-            const minCurve = new THREE.CatmullRomCurve3(minPts, isClosed, 'catmullrom', 0);
-            const minGeo = new THREE.TubeGeometry(minCurve, minPts.length * 4, 0.0015, 8, isClosed);
-            const minMat = new THREE.MeshBasicMaterial({ color: 0x4ea8de, transparent: true, opacity: 0.4, depthTest: true });
-            ghostMin = new THREE.Mesh(minGeo, minMat);
+            ghostMin = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(minPts, isClosed, 'catmullrom', 0), minPts.length * 4, 0.0015, 8, isClosed), new THREE.MeshBasicMaterial({ color: 0x4ea8de, transparent: true, opacity: 0.4, depthTest: true }));
             ghostMin.visible = false;
-            ghostMin.renderOrder = 1;
             this.measurementsGroup.add(ghostMin);
         }
 
         if (data.path_max && data.path_max.length >= 2) {
             const maxPts = data.path_max.map(p => new THREE.Vector3(p[0], p[1], p[2]));
             if (maxPts.length > 2 && maxPts[0].distanceTo(maxPts[maxPts.length - 1]) < 0.005) maxPts.pop();
-            const maxCurve = new THREE.CatmullRomCurve3(maxPts, isClosed, 'catmullrom', 0);
-            const maxGeo = new THREE.TubeGeometry(maxCurve, maxPts.length * 4, 0.0015, 8, isClosed);
-            const maxMat = new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.4, depthTest: true });
-            ghostMax = new THREE.Mesh(maxGeo, maxMat);
+            ghostMax = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(maxPts, isClosed, 'catmullrom', 0), maxPts.length * 4, 0.0015, 8, isClosed), new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.4, depthTest: true }));
             ghostMax.visible = false;
-            ghostMax.renderOrder = 1;
             this.measurementsGroup.add(ghostMax);
         }
 
         const anchorObj = new THREE.Object3D();
-        anchorObj.position.set(...data.label_anchor);
+        // L'ancrage reste toujours strict sur le point d'index 0 tel que fourni par le JSON/Python
+        anchorObj.position.copy(points[0]);
 
         const iconGroup = new THREE.Group();
-        let spriteOffsetX = 0.0;
-        iconGroup.position.x += 0.042; 
-
-        if (this.getLocalizedDesc(data) !== "") {
-            const infoSprite = this.createIconSprite('info');
-            infoSprite.position.set(spriteOffsetX, 0.02, 0);
-            iconGroup.add(infoSprite);
-            spriteOffsetX += 0.06; 
-        }
+        let currentX = 0.0;
         
-        if (data.ui_grid && data.ui_grid.length > 0) {
-            const gridSprite = this.createIconSprite('grid');
-            gridSprite.position.set(spriteOffsetX, 0.02, 0);
-            iconGroup.add(gridSprite);
-            spriteOffsetX += 0.06;
-        }
+        const addSprite = (sprite, width) => {
+            sprite.position.set(currentX + width / 2, -0.025, 0); 
+            iconGroup.add(sprite);
+            currentX += width + 0.01;
+        };
+
+        if (this.getLocalizedDesc(data) !== "") addSprite(this.createIconSprite('info'), 0.050);
+        if (data.ui_grid && data.ui_grid.length > 0) addSprite(this.createIconSprite('grid'), 0.100);
         
         const lengthSprite = this.createIconSprite('text', data.value_cm.toFixed(1) + ' cm');
-        lengthSprite.position.set(spriteOffsetX + 0.035, 0.02, 0);
+        addSprite(lengthSprite, 0.120);
         lengthSprite.visible = false; 
-        iconGroup.add(lengthSprite);
         
+        iconGroup.position.x = 0.02; 
         iconGroup.visible = defaultVisible;
         anchorObj.add(iconGroup);
-
+        
         this.measurementsGroup.add(anchorObj);
 
         return {
-            id: name,
-            groupKey: name,
-            anchor3D: anchorObj,
-            iconGroup: iconGroup,
-            lengthSprite: lengthSprite,
-            color: cssColor,
-            tube: tubeMesh,
-            halo: haloMesh,
-            ghostMin: ghostMin,
-            ghostMax: ghostMax,
-            isVisible: defaultVisible,
-            isSelected: false,
-            rawData: data,
-            gridEngine: this.buildGridEngine(data)
+            id: name, groupKey: name, anchor3D: anchorObj, iconGroup: iconGroup, lengthSprite: lengthSprite,
+            color: cssColor, tube: tubeMesh, halo: haloMesh, ghostMin: ghostMin, ghostMax: ghostMax,
+            isVisible: defaultVisible, isSelected: false, rawData: data, gridEngine: this.buildGridEngine(data)
         };
     }
 
     createIconSprite(type, text = '') {
         const canvas = document.createElement('canvas');
-        canvas.width = type === 'text' ? 256 : 128;
+        canvas.width = (type === 'text' || type === 'grid') ? 256 : 128;
         canvas.height = 128;
         const ctx = canvas.getContext('2d');
 
         if (type === 'info') {
-            ctx.fillStyle = '#ffd700';
-            ctx.beginPath();
-            ctx.arc(64, 64, 58, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            ctx.fillStyle = '#000000';
-            ctx.font = 'bold 70px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#333333';
+            ctx.beginPath(); ctx.arc(64, 64, 56, 0, 2 * Math.PI); ctx.fill();
+            ctx.lineWidth = 6; ctx.strokeStyle = '#ffd700'; ctx.stroke();
+            ctx.fillStyle = '#ffd700'; ctx.font = 'bold 70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('i', 64, 66);
         } else if (type === 'grid') {
-            ctx.fillStyle = 'rgba(78, 168, 222, 0.95)';
-            ctx.beginPath();
-            ctx.rect(14, 14, 100, 50);
+            ctx.fillStyle = '#333333';
+            ctx.beginPath(); 
+            if (ctx.roundRect) ctx.roundRect(8, 16, 240, 96, 20); else ctx.rect(8, 16, 240, 96);
             ctx.fill();
-            
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 32px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('EDIT', 64, 40);
+            ctx.lineWidth = 6; ctx.strokeStyle = '#4ea8de'; ctx.stroke();
+            ctx.fillStyle = '#4ea8de'; ctx.font = 'bold 46px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('EDIT', 128, 66);
         } else if (type === 'text') {
             ctx.fillStyle = 'rgba(22, 24, 28, 0.9)';
             ctx.beginPath();
-            if (ctx.roundRect) {
-                ctx.roundRect(10, 25, 236, 78, 16);
-            } else {
-                ctx.rect(10, 25, 236, 78);
-            }
+            if (ctx.roundRect) ctx.roundRect(10, 25, 236, 78, 16); else ctx.rect(10, 25, 236, 78);
             ctx.fill();
-            
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#4ea8de';
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 44px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            ctx.lineWidth = 4; ctx.strokeStyle = '#4ea8de'; ctx.stroke();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(text, 128, 64);
         }
 
         const texture = new THREE.CanvasTexture(canvas);
-        const material = new THREE.SpriteMaterial({ 
-            map: texture, 
-            depthTest: false,
-            transparent: true,
-            opacity: 0.95
-        });
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true, opacity: 0.95 }));
         
-        const sprite = new THREE.Sprite(material);
-        if (type === 'text') {
-            sprite.scale.set(0.120, 0.060, 0.060);
-        } else {
-            sprite.scale.set(0.050, 0.050, 0.050);
-        }
+        if (type === 'text') sprite.scale.set(0.120, 0.060, 0.060);
+        else if (type === 'grid') sprite.scale.set(0.100, 0.050, 0.050); 
+        else sprite.scale.set(0.050, 0.050, 0.050); 
+        
         sprite.renderOrder = 1000;
+        sprite.userData.originalScale = sprite.scale.clone();
         return sprite;
     }
 
@@ -1114,7 +891,6 @@ class MeasurementViewer {
 
         const div = document.createElement('div');
         div.className = 'legend-item';
-        div.style.position = 'relative'; 
         div.style.borderLeftColor = mObj.color;
         
         const hasGrid = data.ui_grid && data.ui_grid.length > 0;
@@ -1122,57 +898,36 @@ class MeasurementViewer {
         const displayName = this.getLocalizedName(name, data);
 
         div.innerHTML = `
-            <div class="color-hint" style="position: absolute; left: -8px; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 2;">
-                <span style="font-size: 8px; line-height: 1;">&#127912;</span>
+            <div class="leg-col-name">
+                <span class="legend-name">${displayName}</span>
+                ${descText ? `<span class="info-icon" style="color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:14px; height:14px; font-size:10px; font-weight:bold; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" title="${this.t('infoAvailable')}">i</span>` : ''}
+                ${hasGrid ? `<span title="${this.t('editableMeas')}" style="background:rgba(78,168,222,0.15); color:#4ea8de; padding:1px 4px; border-radius:3px; font-size:9px; font-weight:bold; border:1px solid #4ea8de; flex-shrink:0;">EDIT</span>` : ''}
             </div>
-            <input type="color" class="color-picker" value="${mObj.color}" title="${this.t('changeColorTooltip')}" style="position: absolute; left: -16px; top: 0; width: 16px; height: 100%; opacity: 0; cursor: pointer; pointer-events: none; z-index: 3;">
-            
-            <div class="legend-info" style="width: 100%; display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
-                        <span class="legend-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;">${displayName}</span>
-                        ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="${this.t('infoAvailable')}">i</span>` : ''}
-                        ${hasGrid ? `<span title="${this.t('editableMeas')}" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 1px 4px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">EDIT</span>` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; padding-left: 8px; flex-shrink: 0;">
-                        <span class="legend-value" style="white-space: nowrap; font-size: 13px;">${data.value_cm.toFixed(1)} cm</span>
-                        <div class="visibility-toggle ${!mObj.isVisible ? 'off' : ''}" title="${this.t('toggleSingleTooltip')}" style="cursor: pointer; flex-shrink: 0;">
-                            ${mObj.isVisible ? SVG_EYE_OPEN : SVG_EYE_CLOSED}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="leg-col-lr"></div>
+            <div class="leg-col-val legend-value">${data.value_cm.toFixed(1)} cm</div>
+            <div class="leg-col-eye visibility-toggle ${!mObj.isVisible ? 'off' : ''}" title="${this.t('toggleSingleTooltip')}">${mObj.isVisible ? SVG_EYE_OPEN : SVG_EYE_CLOSED}</div>
+            <input type="color" class="color-picker" value="${mObj.color}" style="position:absolute; left:-16px; top:0; width:16px; height:100%; opacity:0; cursor:pointer; pointer-events:none;">
         `;
         this.legendContent.appendChild(div);
 
-        mObj.domElement = div;
-        mObj.hudTargetElement = div;
+        mObj.domElement = div; mObj.hudTargetElement = div;
         mObj.nameSpan = div.querySelector('.legend-name');
         mObj.valueSpan = div.querySelector('.legend-value');
 
         const eyeIcon = div.querySelector('.visibility-toggle');
         const colorPicker = div.querySelector('.color-picker');
 
-        div._forceVisibility = (forceState) => {
-            if (mObj.isVisible !== forceState) {
-                eyeIcon.click(); 
-            }
-        };
+        div._forceVisibility = (forceState) => { if (mObj.isVisible !== forceState) eyeIcon.click(); };
 
         colorPicker.addEventListener('click', (e) => e.stopPropagation());
         colorPicker.addEventListener('input', (e) => {
-            const newColor = e.target.value;
-            mObj.color = newColor;
-            div.style.borderLeftColor = newColor; 
-            mObj.tube.material.color.set(newColor);
-            mObj.halo.material.color.set(newColor);
+            mObj.color = e.target.value; div.style.borderLeftColor = mObj.color; 
+            mObj.tube.material.color.set(mObj.color); mObj.halo.material.color.set(mObj.color);
         });
 
         eyeIcon.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mObj.isVisible = !mObj.isVisible;
-            mObj.tube.visible = mObj.isVisible;
-            mObj.halo.visible = (mObj.isVisible && mObj.isSelected);
+            e.stopPropagation(); mObj.isVisible = !mObj.isVisible;
+            mObj.tube.visible = mObj.isVisible; mObj.halo.visible = (mObj.isVisible && mObj.isSelected);
             if (mObj.iconGroup) mObj.iconGroup.visible = mObj.isVisible;
             if (mObj.ghostMin) mObj.ghostMin.visible = (mObj.isVisible && mObj.isSelected);
             if (mObj.ghostMax) mObj.ghostMax.visible = (mObj.isVisible && mObj.isSelected);
@@ -1186,26 +941,19 @@ class MeasurementViewer {
         this.activeMeasurements.push(mObj);
     }
 
-    // Points 8, 10, 11, 12: Paired measurement on a single compact line with round grey L/R buttons
     createPairedMeasurementVisuals(groupName, items) {
         const builtItems = {};
         items.forEach(entry => {
             const mObj = this.build3DTubeForMeasurement(entry.name, entry.data);
-            if (mObj) {
-                mObj.groupKey = groupName;
-                mObj.isChecked = mObj.isVisible;
-                builtItems[entry.data.side || 'LEFT'] = mObj;
-            }
+            if (mObj) { mObj.groupKey = groupName; mObj.isChecked = mObj.isVisible; builtItems[entry.data.side || 'LEFT'] = mObj; }
         });
 
         const firstObj = builtItems['LEFT'] || builtItems['RIGHT'];
         if (!firstObj) return;
 
         let groupMasterVisible = true;
-
         const div = document.createElement('div');
         div.className = 'legend-item paired-legend-item';
-        div.style.position = 'relative';
         div.style.borderLeftColor = firstObj.color;
 
         const hasGrid = firstObj.rawData.ui_grid && firstObj.rawData.ui_grid.length > 0;
@@ -1213,38 +961,22 @@ class MeasurementViewer {
         const displayName = this.getLocalizedName(groupName, firstObj.rawData);
 
         div.innerHTML = `
-            <div class="color-hint" style="position: absolute; left: -8px; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 2;">
-                <span style="font-size: 8px; line-height: 1;">&#127912;</span>
+            <div class="leg-col-name">
+                <span class="legend-name">${displayName}</span>
+                ${descText ? `<span class="info-icon" style="color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:14px; height:14px; font-size:10px; font-weight:bold; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" title="${this.t('infoAvailable')}">i</span>` : ''}
+                ${hasGrid ? `<span style="background:rgba(78,168,222,0.15); color:#4ea8de; padding:1px 4px; border-radius:3px; font-size:9px; font-weight:bold; border:1px solid #4ea8de; flex-shrink:0;">EDIT</span>` : ''}
             </div>
-            <input type="color" class="color-picker" value="${firstObj.color}" title="${this.t('changeColorTooltip')}" style="position: absolute; left: -16px; top: 0; width: 16px; height: 100%; opacity: 0; cursor: pointer; pointer-events: none; z-index: 3;">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
-                    <span class="legend-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;">${displayName}</span>
-                    ${descText ? `<span class="info-icon" style="color: #ffd700; font-weight: bold; border: 1.5px solid #ffd700; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; cursor: help; flex-shrink: 0;" title="${this.t('infoAvailable')}">i</span>` : ''}
-                    ${hasGrid ? `<span title="${this.t('editableMeas')}" style="background: rgba(78, 168, 222, 0.15); color: #4ea8de; padding: 1px 4px; border-radius: 3px; font-size: 9px; border: 1px solid #4ea8de; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">EDIT</span>` : ''}
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
-                    <div class="lr-inline-container"></div>
-                    <div class="visibility-toggle" title="${this.t('toggleGroupTooltip')}" style="cursor: pointer; flex-shrink: 0;">
-                        ${SVG_EYE_OPEN}
-                    </div>
-                </div>
-            </div>
+            <div class="leg-col-lr lr-inline-container"></div>
+            <div class="leg-col-val legend-value">${firstObj.rawData.value_cm.toFixed(1)} cm</div>
+            <div class="leg-col-eye visibility-toggle" title="${this.t('toggleGroupTooltip')}">${SVG_EYE_OPEN}</div>
+            <input type="color" class="color-picker" value="${firstObj.color}" style="position:absolute; left:-16px; top:0; width:16px; height:100%; opacity:0; cursor:pointer; pointer-events:none;">
         `;
         this.legendContent.appendChild(div);
 
         const sidesContainer = div.querySelector('.lr-inline-container');
         const colorPicker = div.querySelector('.color-picker');
         const eyeIcon = div.querySelector('.visibility-toggle');
-        const nameSpan = div.querySelector('.legend-name');
-
-        div._forceVisibility = (forceState) => {
-            if (groupMasterVisible !== forceState) {
-                eyeIcon.click();
-            }
-        };
+        const valSpan = div.querySelector('.legend-value');
 
         const syncGroupVisibility = () => {
             const anyChecked = Object.values(builtItems).some(x => x.isChecked);
@@ -1261,92 +993,61 @@ class MeasurementViewer {
                 if (mObj.iconGroup) mObj.iconGroup.visible = mObj.isVisible;
                 if (mObj.ghostMin) mObj.ghostMin.visible = (mObj.isVisible && mObj.isSelected);
                 if (mObj.ghostMax) mObj.ghostMax.visible = (mObj.isVisible && mObj.isSelected);
-                
-                if (mObj.sidePill) {
-                    mObj.sidePill.classList.toggle('side-hidden', !mObj.isChecked);
-                }
-                if (mObj.roundBtn) {
-                    mObj.roundBtn.classList.toggle('checked', mObj.isChecked);
-                }
+                if (mObj.roundBtn) mObj.roundBtn.classList.toggle('checked', mObj.isChecked);
             });
         };
 
+        div._forceVisibility = (forceState) => { if (groupMasterVisible !== forceState) eyeIcon.click(); };
+
         colorPicker.addEventListener('click', (e) => e.stopPropagation());
         colorPicker.addEventListener('input', (e) => {
-            const newColor = e.target.value;
-            div.style.borderLeftColor = newColor;
+            div.style.borderLeftColor = e.target.value;
             Object.values(builtItems).forEach(mObj => {
-                mObj.color = newColor;
-                mObj.tube.material.color.set(newColor);
-                mObj.halo.material.color.set(newColor);
+                mObj.color = e.target.value;
+                mObj.tube.material.color.set(e.target.value);
+                mObj.halo.material.color.set(e.target.value);
             });
         });
 
         eyeIcon.addEventListener('click', (e) => {
             e.stopPropagation();
             groupMasterVisible = !groupMasterVisible;
-            
             if (groupMasterVisible && !Object.values(builtItems).some(x => x.isChecked)) {
                 firstObj.isChecked = true;
             }
             syncGroupVisibility();
         });
 
-        [
-            { key: 'LEFT', shortLabel: 'L', titleKey: 'leftTitle' },
-            { key: 'RIGHT', shortLabel: 'R', titleKey: 'rightTitle' }
-        ].forEach(sideCfg => {
-            const mObj = builtItems[sideCfg.key];
+        ['LEFT', 'RIGHT'].forEach(key => {
+            const mObj = builtItems[key];
             if (!mObj) return;
 
-            const statusTag = mObj.rawData.is_clone ? this.t('cloneTag') : this.t('originalTag');
-            const unit = document.createElement('div');
-            unit.className = `lr-side-unit ${!mObj.isChecked ? 'side-hidden' : ''}`;
-            unit.title = `${this.t(sideCfg.titleKey)} (${statusTag})`;
-            unit.innerHTML = `
-                <button type="button" class="lr-round-btn ${mObj.isChecked ? 'checked' : ''}">${sideCfg.shortLabel}</button>
-                <span class="lr-val-span">${mObj.rawData.value_cm.toFixed(1)} cm</span>
-            `;
-            sidesContainer.appendChild(unit);
+            const roundBtn = document.createElement('button');
+            roundBtn.className = `lr-round-btn ${mObj.isChecked ? 'checked' : ''}`;
+            roundBtn.textContent = key === 'LEFT' ? 'L' : 'R';
+            sidesContainer.appendChild(roundBtn);
 
-            const roundBtn = unit.querySelector('.lr-round-btn');
+            mObj.domElement = div; mObj.nameSpan = div.querySelector('.legend-name'); mObj.roundBtn = roundBtn; mObj.hudTargetElement = roundBtn;
 
-            mObj.domElement = div;
-            mObj.nameSpan = nameSpan;
-            mObj.sidePill = unit;
-            mObj.roundBtn = roundBtn;
-            mObj.hudTargetElement = unit;
-            mObj.valueSpan = unit.querySelector('.lr-val-span');
+            roundBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); mObj.isChecked = !mObj.isChecked;
+                if (mObj.isChecked && !groupMasterVisible) groupMasterVisible = true;
+                syncGroupVisibility();
+                if(mObj.isChecked) { valSpan.textContent = mObj.rawData.value_cm.toFixed(1) + ' cm'; this.selectMeasurement(mObj); }
+            });
 
             mObj.setSideChecked = (state) => {
                 mObj.isChecked = state;
-                if (mObj.isChecked && !groupMasterVisible) {
-                    groupMasterVisible = true;
-                }
+                if (mObj.isChecked && !groupMasterVisible) groupMasterVisible = true;
                 syncGroupVisibility();
             };
-
-            // Clicking the round L/R button toggles visibility of that side
-            roundBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mObj.setSideChecked(!mObj.isChecked);
-            });
-
-            // Clicking the measurement value selects this side for inspection/adjustment
-            unit.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (!mObj.isChecked || !groupMasterVisible) {
-                    mObj.setSideChecked(true);
-                }
-                this.selectMeasurement(mObj);
-            });
 
             this.activeMeasurements.push(mObj);
         });
 
         div.addEventListener('click', () => {
             const target = Object.values(builtItems).find(x => x.isVisible) || firstObj;
-            this.selectMeasurement(target);
+            if(target) { valSpan.textContent = target.rawData.value_cm.toFixed(1) + ' cm'; this.selectMeasurement(target); }
         });
 
         syncGroupVisibility();
@@ -1367,7 +1068,6 @@ class MeasurementViewer {
 
         this.controlsPanel.classList.remove('hidden');
 
-        // 1. Info Section
         if (hasInfo && this.descSection) {
             this.descSection.style.display = 'block';
             const titleEl = this.descSection.querySelector('#desc-panel-title');
@@ -1384,18 +1084,10 @@ class MeasurementViewer {
                     const marginAndBorder = descText !== "" ? 'margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);' : '';
                     htmlContent += `<div style="${marginAndBorder} font-size: 12px; color: #ccc; display: flex; flex-direction: column; gap: 6px;">`;
                     if (targetObj.ghostMax && targetObj.rawData.value_max_cm) {
-                        htmlContent += `
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 18px; height: 4px; background: rgba(255, 68, 68, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
-                                <span>Maximum : <strong style="color: #fff;">${targetObj.rawData.value_max_cm.toFixed(1)} cm</strong></span>
-                            </div>`;
+                        htmlContent += `<div style="display: flex; align-items: center; gap: 8px;"><div style="width: 18px; height: 4px; background: rgba(255, 68, 68, 0.8); border-radius: 2px; flex-shrink: 0;"></div><span>${this.t('valMax')} <strong style="color: #fff;">${targetObj.rawData.value_max_cm.toFixed(1)} cm</strong></span></div>`;
                     }
                     if (targetObj.ghostMin && targetObj.rawData.value_min_cm) {
-                        htmlContent += `
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 18px; height: 4px; background: rgba(78, 168, 222, 0.8); border-radius: 2px; flex-shrink: 0;"></div>
-                                <span>Minimum : <strong style="color: #fff;">${targetObj.rawData.value_min_cm.toFixed(1)} cm</strong></span>
-                            </div>`;
+                        htmlContent += `<div style="display: flex; align-items: center; gap: 8px;"><div style="width: 18px; height: 4px; background: rgba(78, 168, 222, 0.8); border-radius: 2px; flex-shrink: 0;"></div><span>${this.t('valMin')} <strong style="color: #fff;">${targetObj.rawData.value_min_cm.toFixed(1)} cm</strong></span></div>`;
                     }
                     htmlContent += `</div>`;
                 }
@@ -1405,14 +1097,13 @@ class MeasurementViewer {
             this.descSection.style.display = 'none';
         }
 
-        // 2. Subtle Grey Divider when BOTH Info and Edit are visible
         if (this.mergedDivider) {
             this.mergedDivider.style.display = (hasInfo && hasGrid) ? 'block' : 'none';
         }
 
-        // 3. Edit Section
-        if (hasGrid && this.editSection) {
-            this.editSection.style.display = 'block';
+        if (hasGrid && this.editSectionLayout) {
+            this.editSectionLayout.style.display = 'flex';
+            this.controlsPanel.querySelector('.controls-header').style.display = 'flex';
             this.configureSlidersRange(targetObj);
             this.renderMarkers(targetObj);
 
@@ -1426,16 +1117,16 @@ class MeasurementViewer {
 
             const lblTh = document.getElementById('label-val-theta');
             const lblPh = document.getElementById('label-val-phi');
-            if (lblTh) lblTh.textContent = `${curTh > 0 ? '+' : ''}${parseFloat(curTh).toFixed(1)}\u00b0`;
-            if (lblPh) lblPh.textContent = `${curPh > 0 ? '+' : ''}${parseFloat(curPh).toFixed(1)}\u00b0`;
-        } else if (this.editSection) {
-            this.editSection.style.display = 'none';
+            if (lblTh) lblTh.textContent = `${curTh > 0 ? '+' : ''}${parseFloat(curTh).toFixed(1)}°`;
+            if (lblPh) lblPh.textContent = `${curPh > 0 ? '+' : ''}${parseFloat(curPh).toFixed(1)}°`;
+        } else if (this.editSectionLayout) {
+            this.editSectionLayout.style.display = 'none';
+            this.controlsPanel.querySelector('.controls-header').style.display = 'none';
         }
     }
 
     selectMeasurement(targetObj) {
         let toggledOn = false;
-
         for (const item of this.activeMeasurements) {
             if (item === targetObj) {
                 item.isSelected = !item.isSelected;
@@ -1444,13 +1135,10 @@ class MeasurementViewer {
                 item.isSelected = false;
             }
         }
-
         for (const item of this.activeMeasurements) {
             this.applySelectionState(item);
         }
-
         this.selectedMeasurement = toggledOn ? targetObj : null;
-
         if (toggledOn && targetObj) {
             this.updateMergedPanelContent(targetObj);
         } else if (this.controlsPanel) {
@@ -1459,16 +1147,9 @@ class MeasurementViewer {
     }
 
     applySelectionState(item) {
-        const hint = item.domElement.querySelector('.color-hint');
+        if (!item.domElement) return;
         const picker = item.domElement.querySelector('.color-picker');
-
-        const anySiblingSelected = this.activeMeasurements.some(
-            m => m.domElement === item.domElement && m.isSelected
-        );
-
-        if (item.sidePill) {
-            item.sidePill.classList.toggle('active-edit', item.isSelected);
-        }
+        const anySiblingSelected = this.activeMeasurements.some(m => m.domElement === item.domElement && m.isSelected);
 
         if (item.isSelected) {
             item.domElement.classList.add('selected');
@@ -1478,14 +1159,10 @@ class MeasurementViewer {
             if (item.isVisible && item.lengthSprite) item.lengthSprite.visible = true;
             if (item.ghostMin) item.ghostMin.visible = item.isVisible;
             if (item.ghostMax) item.ghostMax.visible = item.isVisible;
-            
-            if (hint) hint.style.opacity = '1';
             if (picker) picker.style.pointerEvents = 'auto';
-
         } else {
             if (!anySiblingSelected) {
                 item.domElement.classList.remove('selected');
-                if (hint) hint.style.opacity = '0';
                 if (picker) picker.style.pointerEvents = 'none';
             }
             item.tube.material.depthTest = true;
@@ -1500,32 +1177,23 @@ class MeasurementViewer {
     buildGridEngine(data) {
         const gridData = data.ui_grid;
         if (!gridData || gridData.length === 0) return null;
-        
         const t_set = new Set(), th_set = new Set(), ph_set = new Set();
         const map = new Map();
-        
         gridData.forEach(node => {
-            t_set.add(node.t);
-            th_set.add(node.theta_deg);
-            ph_set.add(node.phi_deg);
+            t_set.add(node.t); th_set.add(node.theta_deg); ph_set.add(node.phi_deg);
             map.set(`${node.t}_${node.theta_deg}_${node.phi_deg}`, node);
         });
-
         const t_arr = Array.from(t_set).sort((a,b)=>a-b);
         const th_arr = Array.from(th_set).sort((a,b)=>a-b);
         const ph_arr = Array.from(ph_set).sort((a,b)=>a-b);
-
         const minTh = data.theta_limit_deg !== undefined ? -Math.abs(data.theta_limit_deg) : th_arr[0];
         const maxTh = data.theta_limit_deg !== undefined ?  Math.abs(data.theta_limit_deg) : th_arr[th_arr.length-1];
         const minPh = data.phi_limit_deg !== undefined ? -Math.abs(data.phi_limit_deg) : ph_arr[0];
         const maxPh = data.phi_limit_deg !== undefined ?  Math.abs(data.phi_limit_deg) : ph_arr[ph_arr.length-1];
 
         return {
-            map,
-            t_arr, th_arr, ph_arr,
-            minT: t_arr[0], maxT: t_arr[t_arr.length-1],
-            minTh, maxTh,
-            minPh, maxPh,
+            map, t_arr, th_arr, ph_arr,
+            minT: t_arr[0], maxT: t_arr[t_arr.length-1], minTh, maxTh, minPh, maxPh,
             customMarkers: data.customMarkers || []
         };
     }
@@ -1534,11 +1202,9 @@ class MeasurementViewer {
         if (arr.length === 1) return [arr[0], arr[0], 0];
         if (val <= arr[0]) return [arr[0], arr[1], 0];
         if (val >= arr[arr.length-1]) return [arr[arr.length-2], arr[arr.length-1], 1];
-        
         for (let i=0; i<arr.length-1; i++) {
             if (val >= arr[i] && val <= arr[i+1]) {
-                const ratio = (val - arr[i]) / (arr[i+1] - arr[i]);
-                return [arr[i], arr[i+1], ratio];
+                return [arr[i], arr[i+1], (val - arr[i]) / (arr[i+1] - arr[i])];
             }
         }
         return [arr[0], arr[0], 0];
@@ -1552,10 +1218,7 @@ class MeasurementViewer {
         for (let i = 0; i < points3D.length; i++) {
             const p1 = points3D[i];
             const p2 = points3D[(i + 1) % points3D.length];
-            const dx = p2[0] - p1[0];
-            const dy = p2[1] - p1[1];
-            const dz = p2[2] - p1[2];
-            total += Math.sqrt(dx * dx + dy * dy + dz * dz);
+            total += Math.sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2);
         }
         return total * 100.0;
     }
@@ -1566,8 +1229,7 @@ class MeasurementViewer {
         const [ph0, ph1, rph] = this.getBounds(ph, eng.ph_arr);
         
         const getVal = (t_v, th_v, ph_v) => {
-            const key = `${t_v}_${th_v}_${ph_v}`;
-            return eng.map.get(key) || eng.map.values().next().value;
+            return eng.map.get(`${t_v}_${th_v}_${ph_v}`) || eng.map.values().next().value;
         };
 
         const c000 = getVal(t0, th0, ph0); const c100 = getVal(t1, th0, ph0);
@@ -1620,10 +1282,9 @@ class MeasurementViewer {
             item.lengthSprite.material = newSprite.material;
         }
 
-        const points = result.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
+        let points = result.path_3d.map(p => new THREE.Vector3(p[0], p[1], p[2]));
         
-        let isClosed = item.rawData.is_closed_loop === true || item.rawData.is_closed === true;
-        if (item.rawData.type === 'slicer') isClosed = true;
+        let isClosed = item.rawData.is_closed_loop === true || item.rawData.is_closed === true || item.rawData.type === 'slicer';
         if (points.length > 2) {
             const dist = points[0].distanceTo(points[points.length - 1]);
             if (dist < 0.04) isClosed = true;
@@ -1672,7 +1333,6 @@ class MeasurementViewer {
         this.sliderT.dispatchEvent(new Event('input'));
     }
 
-    // Point 16: Render default reset markers below horizontal sliders with clear tooltip
     renderMarkers(item) {
         if (!item.gridEngine) return;
         const eng = item.gridEngine;
@@ -1681,6 +1341,7 @@ class MeasurementViewer {
             if (Math.abs(max - min) < 1e-6) return 50;
             return ((val - min) / (max - min)) * 100;
         };
+        const getOffsetStyle = (pct) => `calc(${pct}% + ${7 - (pct / 100) * 14}px)`;
 
         ['t', 'theta', 'phi'].forEach(axis => {
             const container = document.getElementById(`markers-container-${axis}`);
@@ -1699,8 +1360,9 @@ class MeasurementViewer {
             const defPct = toPercent(defVal, minV, maxV);
             const defMarker = document.createElement('div');
             defMarker.className = `marker default-marker ${className}`;
-            defMarker.style[styleProp] = `${defPct}%`;
+            defMarker.style[styleProp] = getOffsetStyle(defPct);
             defMarker.title = `${this.t('defaultMarkerTooltip')} (${defVal})`;
+            defMarker.innerHTML = '↺';
             
             defMarker.addEventListener('click', () => {
                 if (axis === 't') this.sliderT.value = defVal;
@@ -1719,7 +1381,7 @@ class MeasurementViewer {
                     if (axis === 'phi') mVal = m.ph;
                     
                     const pct = toPercent(mVal, minV, maxV);
-                    cMarker.style[styleProp] = `${pct}%`;
+                    cMarker.style[styleProp] = getOffsetStyle(pct);
                     cMarker.title = `${this.t('customMarkerTooltip')} (${mVal.toFixed(1)})`;
                     
                     cMarker.addEventListener('click', () => {
@@ -1786,5 +1448,4 @@ class MeasurementViewer {
     }
 }
 
-const app = new MeasurementViewer();
-app.init();
+new MeasurementViewer().init();

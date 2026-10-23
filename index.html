@@ -8,13 +8,10 @@
             --bg: #1F2123;
             --panel-grad: linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.02) 100%);
             --panel-border: rgba(255, 255, 255, 0.07);
-            --tile: rgba(255, 255, 255, 0.045);
-            --tile-hover: rgba(255, 255, 255, 0.085);
             --text: #e6e8ec;
             --text2: #9aa0ab;
             --accent: #8fb4c9;
-            --accent-marker: #e2a054;
-            --accent-soft: rgba(143, 180, 201, 0.16);
+            --accent-orange: #ff9900;
         }
 
         body {
@@ -43,7 +40,7 @@
             pointer-events: none;
         }
 
-        /* --- BARRE HAUT-GAUCHE (LANGUE, PLEIN ÉCRAN, IDENTITÉ MODÈLE) --- */
+        /* --- BARRE HAUT-GAUCHE (AGRANDIE ET AIDE) --- */
         #top-left-bar {
             position: absolute;
             top: 20px;
@@ -51,7 +48,7 @@
             z-index: 30;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             pointer-events: auto;
         }
 
@@ -67,42 +64,77 @@
             color: var(--text);
             border-radius: 8px;
             padding: 6px 11px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
             backdrop-filter: blur(8px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            transition: background 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: 0.2s;
         }
 
             .top-ui-btn:hover {
-                background: rgba(255, 255, 255, 0.12);
-                border-color: rgba(255, 255, 255, 0.3);
+                background: rgba(255,255,255,0.15);
+                border-color: rgba(255,255,255,0.4);
             }
 
         #model-identity-badge {
             background: rgba(22, 24, 28, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 13px;
+            padding: 8px 14px;
+            font-size: 15px; /* Agrandissement demandé */
             font-weight: 600;
-            color: var(--text);
+            color: #fff;
             backdrop-filter: blur(8px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
 
-        /* --- LEGEND PANEL (DROITE) --- */
+        /* --- HELP MODAL --- */
+        #help-modal {
+            position: absolute;
+            top: 110px;
+            left: 20px;
+            width: 280px;
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 40;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            font-size: 13px;
+            line-height: 1.5;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+            #help-modal.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(-10px);
+            }
+
+        .help-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .help-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- LEGEND PANEL --- */
         #right-panel {
             position: absolute;
             right: 20px;
             top: 20px;
-            width: 430px;
+            width: 440px;
             max-width: calc(100vw - 40px);
             max-height: calc(100% - 40px);
             background: var(--bg) var(--panel-grad);
@@ -111,8 +143,7 @@
             z-index: 10;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.28);
         }
 
         .panel-header {
@@ -128,27 +159,34 @@
                 font-size: 14px;
                 font-weight: 600;
                 text-transform: uppercase;
-                letter-spacing: 0.8px;
             }
 
         #legend-content {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 10px;
+            padding: 10px;
         }
 
+        /* UTILISATION DE GRID POUR UN ALIGNEMENT PARFAIT */
         .legend-item {
-            margin-bottom: 5px;
-            padding: 7px 12px;
-            background: rgba(255, 255, 255, 0.03);
+            display: grid;
+            /* Colonnes : 1.Nom(flex) 2.Boutons L/R 3.Valeur cm 4.Oeil */
+            grid-template-columns: minmax(0, 1fr) 50px 60px 24px;
+            gap: 8px;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
             border-radius: 8px;
             border-left: 4px solid transparent;
             cursor: pointer;
-            transition: all 0.2s;
+            padding: 0 12px;
+            margin-bottom: 6px;
+            height: 44px; /* Hauteur normalisée pour tous les blocs */
+            box-sizing: border-box;
+            transition: background 0.2s;
         }
 
             .legend-item:hover {
-                background: rgba(255, 255, 255, 0.06);
+                background: rgba(255,255,255,0.06);
             }
 
             .legend-item.selected {
@@ -160,62 +198,55 @@
                 opacity: 0.4;
             }
 
-        .visibility-toggle {
-            display: inline-flex;
+        /* Cellules de la Grid */
+        .leg-col-name {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--text);
-            opacity: 0.75;
-            transition: opacity 0.2s;
+            gap: 6px;
+            overflow: hidden;
         }
 
-            .visibility-toggle:hover {
+        .leg-col-lr {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .leg-col-val {
+            text-align: right;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .leg-col-eye {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            opacity: 0.75;
+        }
+
+            .leg-col-eye:hover {
                 opacity: 1;
             }
 
-            .visibility-toggle.off {
-                opacity: 0.35;
-            }
-
-        /* --- BOUTONS RONDS L / R SUR UNE SEULE LIGNE --- */
-        .lr-inline-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .legend-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 13px;
         }
 
-        .lr-side-unit {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 5px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            transition: all 0.15s;
-            cursor: pointer;
-        }
-
-            .lr-side-unit:hover {
-                background: rgba(255, 255, 255, 0.06);
-            }
-
-            .lr-side-unit.active-edit {
-                background: rgba(78, 168, 222, 0.2);
-                border-color: var(--accent);
-            }
-
-            .lr-side-unit.side-hidden {
-                opacity: 0.35;
-            }
-
+        /* Boutons L/R (Rétrécis) */
         .lr-round-btn {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #5a6069;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 10px;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 9px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
@@ -223,26 +254,20 @@
             cursor: pointer;
             padding: 0;
             line-height: 1;
-            flex-shrink: 0;
-            transition: background 0.15s, transform 0.1s;
+            transition: 0.15s;
         }
 
             .lr-round-btn:hover {
-                transform: scale(1.08);
+                transform: scale(1.1);
                 background: #737a85;
             }
 
             .lr-round-btn.checked {
                 background: #6c737d;
-                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+                box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.6);
             }
 
-        .lr-val-span {
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        /* --- PANNEAU FUSIONNÉ INFO + AJUSTEMENT (BAS-GAUCHE) --- */
+        /* --- PANNEAU FUSIONNÉ --- */
         #controls-panel {
             position: absolute;
             bottom: 20px;
@@ -250,13 +275,13 @@
             width: 380px;
             max-width: calc(100vw - 40px);
             background: rgba(22, 24, 28, 0.92);
-            border: 1px solid rgba(255, 180, 0, 0.55);
+            border: 1px solid var(--accent-orange);
             border-radius: 10px;
             padding: 15px;
             box-sizing: border-box;
             z-index: 20;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.35);
             transition: opacity 0.3s, transform 0.3s;
         }
 
@@ -265,13 +290,6 @@
                 pointer-events: none;
                 transform: translateY(10px);
             }
-
-        #merged-desc-divider {
-            border: 0;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.12);
-            margin: 12px 0;
-        }
 
         .controls-header {
             display: flex;
@@ -287,7 +305,21 @@
                 font-size: 14px;
                 font-weight: 600;
                 text-transform: uppercase;
-                color: var(--text);
+            }
+
+        .btn-reset-icon {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: transform 0.3s;
+        }
+
+            .btn-reset-icon:hover {
+                transform: rotate(-180deg);
+                color: var(--accent-orange);
             }
 
         .sliders-layout {
@@ -295,58 +327,6 @@
             gap: 20px;
         }
 
-        /* Wrappers des sliders pour accueillir les marqueurs */
-        .slider-track-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .slider-track-wrapper.horiz {
-                width: 100%;
-                height: 32px;
-                padding-bottom: 6px;
-            }
-
-        /* Les containers de marqueurs absolus */
-        .markers-container {
-            position: absolute;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-            .markers-container.horiz {
-                left: 0;
-                right: 0;
-                top: 0;
-                height: 100%;
-            }
-
-        /* Les traits de marqueurs */
-        .marker {
-            position: absolute;
-            pointer-events: auto;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-            .marker:hover {
-                transform: scale(1.3);
-                z-index: 10;
-            }
-
-            .marker.default-marker {
-                background: #4ea8de;
-                box-shadow: 0 0 4px rgba(78, 168, 222, 0.8);
-            }
-
-            .marker.custom-marker {
-                background: var(--accent-marker);
-                border: 1px solid #fff;
-            }
-
-        /* Disposition Verticale */
         .vertical-slider-container {
             display: flex;
             flex-direction: column;
@@ -357,39 +337,6 @@
             border-right: 1px solid var(--panel-border);
         }
 
-        .slider-track-wrapper:not(.horiz) {
-            height: 140px;
-            width: 30px;
-        }
-
-        .markers-container:not(.horiz) {
-            top: 0;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-        }
-
-        .marker.vertical-m {
-            width: 10px;
-            height: 4px;
-            right: 0px;
-            transform: translateY(-50%);
-            border-radius: 2px;
-            z-index: 15;
-        }
-
-        /* Hack CSS Slider Vertical */
-        input[type=range][orient=vertical] {
-            writing-mode: vertical-lr;
-            direction: rtl;
-            width: 8px;
-            height: 140px;
-            padding: 0;
-            margin: 0;
-            vertical-align: bottom;
-        }
-
-        /* Disposition Horizontale */
         .horizontal-sliders-container {
             flex: 1;
             display: flex;
@@ -407,27 +354,83 @@
         .slider-label {
             font-size: 11px;
             color: var(--text2);
-            text-align: center;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        input[type=range]:not([orient=vertical]) {
-            width: 100%;
-            margin: 0;
+        /* Conteneurs des pistes */
+        .slider-track-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Marqueur placé SOUS le slider horizontal */
-        .marker.horizontal-m {
-            width: 4px;
-            height: 10px;
-            bottom: 0px;
-            transform: translateX(-50%);
-            border-radius: 2px;
-            z-index: 15;
+            .slider-track-wrapper.horiz {
+                width: 100%;
+                height: 32px;
+                padding-bottom: 6px;
+            }
+
+            .slider-track-wrapper:not(.horiz) {
+                height: 140px;
+                width: 30px;
+            }
+
+        /* Conteneurs des icones ↺ de Reset */
+        .markers-container {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
         }
 
-        /* Design Webkit Sliders */
+            .markers-container.horiz {
+                left: 0;
+                right: 0;
+                top: 0;
+                height: 100%;
+            }
+
+            .markers-container:not(.horiz) {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            }
+
+        .marker {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+            .marker:hover {
+                color: var(--accent-orange);
+                transform: scale(1.3) rotate(-90deg);
+            }
+
+            .marker.horizontal-m {
+                width: 14px;
+                height: 14px;
+                bottom: -2px;
+                transform: translateX(-50%);
+            }
+
+            .marker.vertical-m {
+                width: 14px;
+                height: 14px;
+                right: -8px;
+                transform: translateY(-50%);
+            }
+
+        /* NOUVEAU CURSEUR EN FORME DE PIN */
         input[type="range"] {
             -webkit-appearance: none;
             background: rgba(255, 255, 255, 0.1);
@@ -435,37 +438,47 @@
             outline: none;
             position: relative;
             z-index: 10;
+            margin: 0;
         }
 
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 16px;
-                height: 16px;
-                border-radius: 50%;
-                background: var(--accent);
-                cursor: pointer;
-                transition: transform 0.1s;
-            }
-
-                input[type="range"]::-webkit-slider-thumb:hover {
-                    transform: scale(1.2);
-                }
-
-        .btn-action {
-            background: var(--tile);
-            border: 1px solid var(--panel-border);
-            color: var(--text);
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
+        input[type=range][orient=vertical] {
+            writing-mode: vertical-lr;
+            direction: rtl;
+            width: 6px;
+            height: 140px;
         }
 
-            .btn-action:hover {
-                background: var(--tile-hover);
+        input[type=range]:not([orient=vertical]) {
+            width: 100%;
+            height: 6px;
+        }
+
+        /* 1. Pin classique (vertical) pour les sliders horizontaux (Theta, Phi) */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 20px;
+            background-color: transparent;
+            /* SVG d'un Pin debout : Rond en haut, tige en bas */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 20'%3E%3Ccircle cx='7' cy='5' r='5' fill='%23e6e8ec'/%3E%3Crect x='6' y='10' width='2' height='10' fill='%23e6e8ec'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: grab;
+            transition: transform 0.1s;
+        }
+
+            input[type="range"]::-webkit-slider-thumb:active {
+                cursor: grabbing;
+                transform: scale(1.1);
             }
+
+        /* 2. Pin couché (horizontal) SPÉCIFIQUE pour le slider vertical (Taille) */
+        input[type=range][orient=vertical]::-webkit-slider-thumb {
+            width: 20px;
+            height: 14px; /* On force à 14px sur l'axe vertical pour que le correctif JS s'aligne au millimètre ! */
+            /* SVG d'un Pin couché : Rond à gauche, tige vers la droite */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 14'%3E%3Ccircle cx='5' cy='7' r='5' fill='%23e6e8ec'/%3E%3Crect x='10' y='6' width='10' height='2' fill='%23e6e8ec'/%3E%3C/svg%3E");
+        }
 
         /* Loading */
         #loading-overlay {
@@ -511,39 +524,45 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
         }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.2);
-            }
     </style>
-
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 </head>
 <body>
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <div id="loading-text" style="color: #888; font-size: 14px;">Loading 3D model...</div>
+        <div id="loading-text" style="color: #888; font-size: 14px;">Chargement du modèle...</div>
     </div>
 
-    <!-- Barre Haut-Gauche : Langue, Plein Écran & Identité du modèle -->
+    <!-- Barre Haut-Gauche -->
     <div id="top-left-bar">
         <div class="top-left-Controls">
-            <button id="btn-lang-switch" class="top-ui-btn" title="Switch Language (EN / FR)"></button>
-            <button id="btn-fullscreen-toggle" class="top-ui-btn" title="Toggle Fullscreen (F11 / Esc)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                </svg>
+            <button id="btn-help-toggle" class="top-ui-btn" title="Help / Guide">?</button>
+            <button id="btn-lang-switch" class="top-ui-btn" title="Switch Language"></button>
+            <button id="btn-fullscreen-toggle" class="top-ui-btn" title="Plein Écran">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
             </button>
         </div>
         <div id="model-identity-badge"></div>
+    </div>
+
+    <!-- Help Modal (Point 6) -->
+    <div id="help-modal">
+        <h4 style="margin-top:0; color:var(--accent);" data-i18n="helpTitle">Contrôles du Viewer</h4>
+        <div class="help-item"><span class="help-icon">🖱️</span> <span data-i18n="helpOrbit">Clic gauche enfoncé : Tourner la vue</span></div>
+        <div class="help-item"><span class="help-icon">🖐️</span> <span data-i18n="helpPan">Clic droit enfoncé : Déplacer la vue (Pan)</span></div>
+        <div class="help-item"><span class="help-icon">📏</span> <span data-i18n="helpSelect">Clic sur légende : Sélectionner la mesure</span></div>
+        <hr style="border:0; height:1px; background:rgba(255,255,255,0.1); margin:10px 0;">
+        <div class="help-item">
+            <span class="help-icon" style="color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:bold; line-height:16px;">i</span>
+            <span data-i18n="helpInfo">Information additionnelle disponible</span>
+        </div>
+        <div class="help-item">
+            <span class="help-icon" style="color:#4ea8de; border:1px solid #4ea8de; border-radius:3px; padding:1px 3px; font-size:9px; font-weight:bold;">EDIT</span>
+            <span data-i18n="helpEdit">Mesure ajustable via les curseurs</span>
+        </div>
     </div>
 
     <div id="canvas-container"></div>
@@ -551,32 +570,31 @@
 
     <div id="right-panel">
         <div class="panel-header legend-header">
-            <h2 data-i18n="measurementsTitle">Measurements</h2>
+            <h2 data-i18n="measurementsTitle">Mensurations</h2>
         </div>
         <div id="legend-content"></div>
     </div>
 
     <div id="controls-panel" class="hidden">
         <div class="controls-header">
-            <h4>Tailor Adjustment</h4>
-            <button id="btn-reset-slider" class="btn-action" title="Reset all sliders to default">↺ Reset</button>
+            <h4 data-i18n="adjustTitle">Ajustement Tailleur</h4>
+            <!-- Bouton Reset All avec icone ↺ -->
+            <button id="btn-reset-slider" class="btn-reset-icon" title="Reset all">↺</button>
         </div>
 
         <div class="sliders-layout">
-            <!-- Slider Vertical : Hauteur (T) -->
             <div class="vertical-slider-container">
-                <span class="slider-label">High</span>
+                <span class="slider-label" data-i18n="highWaist">Taille haute</span>
                 <div class="slider-track-wrapper">
                     <input type="range" id="slider-t" min="0" max="1" step="0.001" value="0.5" orient="vertical">
                     <div id="markers-container-t" class="markers-container"></div>
                 </div>
-                <span class="slider-label">Low</span>
+                <span class="slider-label" data-i18n="lowWaist">Taille basse</span>
             </div>
 
-            <!-- Sliders Horizontaux : Angles de -limite a +limite -->
             <div class="horizontal-sliders-container">
                 <div class="horiz-group">
-                    <span class="slider-label">Front/Back Tilt (Theta: <strong id="label-val-theta" style="color: var(--accent);">0.0°</strong>)</span>
+                    <span class="slider-label"><span data-i18n="tiltFB">Inclinaison AV/AR</span> (Theta : <strong id="label-val-theta" style="color: var(--accent);">0.0°</strong>)</span>
                     <div class="slider-track-wrapper horiz">
                         <input type="range" id="slider-theta" min="-12" max="12" step="0.1" value="0">
                         <div id="markers-container-theta" class="markers-container horiz"></div>
@@ -584,7 +602,7 @@
                 </div>
 
                 <div class="horiz-group">
-                    <span class="slider-label">Left/Right Tilt (Phi: <strong id="label-val-phi" style="color: var(--accent);">0.0°</strong>)</span>
+                    <span class="slider-label"><span data-i18n="tiltLR">Inclinaison G/D</span> (Phi : <strong id="label-val-phi" style="color: var(--accent);">0.0°</strong>)</span>
                     <div class="slider-track-wrapper horiz">
                         <input type="range" id="slider-phi" min="-12" max="12" step="0.1" value="0">
                         <div id="markers-container-phi" class="markers-container horiz"></div>
