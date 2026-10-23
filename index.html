@@ -93,6 +93,18 @@
         }
 
         /* --- HELP MODAL --- */
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(-15px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
         #help-modal {
             position: absolute;
             top: 110px;
@@ -107,13 +119,16 @@
             backdrop-filter: blur(10px);
             font-size: 13px;
             line-height: 1.5;
+            transform-origin: top left;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             transition: opacity 0.2s, transform 0.2s;
         }
 
             #help-modal.hidden {
                 opacity: 0;
                 pointer-events: none;
-                transform: translateY(-10px);
+                transform: scale(0.95) translateY(-10px);
+                animation: none; /* Remet à zéro l'animation initiale */
             }
 
         .help-item {
@@ -128,6 +143,7 @@
             width: 20px;
             text-align: center;
         }
+
 
         /* --- LEGEND PANEL --- */
         #right-panel {
@@ -170,7 +186,6 @@
         /* UTILISATION DE GRID POUR UN ALIGNEMENT PARFAIT */
         .legend-item {
             display: grid;
-            /* Colonnes : 1.Nom(flex) 2.Boutons L/R 3.Valeur cm 4.Oeil */
             grid-template-columns: minmax(0, 1fr) 50px 60px 24px;
             gap: 8px;
             align-items: center;
@@ -178,9 +193,9 @@
             border-radius: 8px;
             border-left: 4px solid transparent;
             cursor: pointer;
-            padding: 0 12px;
-            margin-bottom: 6px;
-            height: 44px; /* Hauteur normalisée pour tous les blocs */
+            padding: 0 10px;
+            margin-bottom: 4px;
+            height: 34px; /* Raccourci (avant: 44px) */
             box-sizing: border-box;
             transition: background 0.2s;
         }

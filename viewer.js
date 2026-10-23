@@ -271,10 +271,21 @@ class MeasurementViewer {
             }
         });
 
+        // Gestion du panneau d'aide (Ouverture + Fermeture clic extérieur)
         const helpBtn = document.getElementById('btn-help-toggle');
         const helpModal = document.getElementById('help-modal');
         if (helpBtn && helpModal) {
-            helpBtn.addEventListener('click', () => helpModal.classList.toggle('hidden'));
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                helpModal.classList.toggle('hidden');
+            });
+            
+            // Ferme le modal si clic à l'extérieur
+            document.addEventListener('pointerdown', (e) => {
+                if (!helpModal.classList.contains('hidden') && !helpModal.contains(e.target) && !helpBtn.contains(e.target)) {
+                    helpModal.classList.add('hidden');
+                }
+            });
         }
     }
 
@@ -818,7 +829,7 @@ class MeasurementViewer {
         let currentX = 0.0;
         
         const addSprite = (sprite, width) => {
-            sprite.position.set(currentX + width / 2, -0.025, 0); 
+            sprite.position.set(currentX + width / 2, -0.01, -0.0125); 
             iconGroup.add(sprite);
             currentX += width + 0.01;
         };
