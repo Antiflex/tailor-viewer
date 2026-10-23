@@ -1,4 +1,3 @@
-// viewer.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -25,8 +24,9 @@ const I18N = {
         toggleAllTooltip: "Show / Hide all",
         filterTooltip: "Filter Left / Right / Default",
         defaultFilter: "Default",
-        leftOnly: "L Only",
-        rightOnly: "R Only",
+        filterAll: "L / R",
+        leftOnly: "L",
+        rightOnly: "R",
         leftShort: "L",
         rightShort: "R",
         leftTitle: "Left Side",
@@ -69,10 +69,11 @@ const I18N = {
         toggleAllTooltip: "Afficher / Masquer tout",
         filterTooltip: "Filtre Gauche / Droit / D\u00e9faut",
         defaultFilter: "D\u00e9faut",
-        leftOnly: "L Seul",
-        rightOnly: "R Seul",
-        leftShort: "L",
-        rightShort: "R",
+        filterAll: "G / D",
+        leftOnly: "G",
+        rightOnly: "D",
+        leftShort: "G",
+        rightShort: "D",
         leftTitle: "C\u00f4t\u00e9 Gauche",
         rightTitle: "C\u00f4t\u00e9 Droit",
         originalTag: "Original",
@@ -113,10 +114,11 @@ const I18N = {
         toggleAllTooltip: "Mostrar / Ocultar todo",
         filterTooltip: "Filtro Izquierdo / Derecho / Defecto",
         defaultFilter: "Defecto",
-        leftOnly: "L Solo",
-        rightOnly: "R Solo",
-        leftShort: "L",
-        rightShort: "R",
+        filterAll: "I / D",
+        leftOnly: "I",
+        rightOnly: "D",
+        leftShort: "I",
+        rightShort: "D",
         leftTitle: "Lado Izquierdo",
         rightTitle: "Lado Derecho",
         originalTag: "Original",
@@ -157,8 +159,9 @@ const I18N = {
         toggleAllTooltip: "Alle umschalten",
         filterTooltip: "Filter Links / Rechts / Standard",
         defaultFilter: "Standard",
-        leftOnly: "Nur L",
-        rightOnly: "Nur R",
+        filterAll: "L / R",
+        leftOnly: "L",
+        rightOnly: "R",
         leftShort: "L",
         rightShort: "R",
         leftTitle: "Linke Seite",
@@ -271,7 +274,7 @@ class MeasurementViewer {
             }
         });
 
-        // Gestion du panneau d'aide (Ouverture + Fermeture clic extérieur)
+        // Gestion du panneau d'aide
         const helpBtn = document.getElementById('btn-help-toggle');
         const helpModal = document.getElementById('help-modal');
         if (helpBtn && helpModal) {
@@ -292,7 +295,7 @@ class MeasurementViewer {
     updateLangButtonLabel() {
         if (!this.langBtn) return;
         const htmlParts = this.availableLangs.map(l => {
-            if (l === this.lang) return `<span style="color:#ffd700;">${l.toUpperCase()}</span>`;
+            if (l === this.lang) return `<span style="color:#ff9900;">${l.toUpperCase()}</span>`;
             return `<span style="opacity:0.6;">${l.toUpperCase()}</span>`;
         });
         this.langBtn.innerHTML = htmlParts.join(' <span style="opacity:0.4;">&nbsp;|&nbsp;</span> ');
@@ -333,8 +336,8 @@ class MeasurementViewer {
         this.descSection.style.display = 'none';
         this.descSection.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-                <span style="color: #ffd700; font-weight: bold; border: 2px solid #ffd700; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; flex-shrink: 0;">i</span>
-                <strong id="desc-panel-title" style="font-size: 14px; color: #ffd700;"></strong>
+                <span style="color: #ff9900; font-weight: bold; border: 2px solid #ff9900; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; flex-shrink: 0;">i</span>
+                <strong id="desc-panel-title" style="font-size: 14px; color: #ff9900;"></strong>
             </div>
             <div id="desc-panel-content" style="font-size: 13px; line-height: 1.45; color: #ddd;"></div>
         `;
@@ -398,7 +401,13 @@ class MeasurementViewer {
 
         this.activeMeasurements.forEach(mObj => {
             if (mObj.nameSpan) {
-                mObj.nameSpan.textContent = this.getLocalizedName(mObj.groupKey || mObj.id, mObj.rawData);
+                // UTILISATION CORRECTE DE pair_group
+                const templateKey = mObj.rawData.pair_group || mObj.id;
+                mObj.nameSpan.textContent = this.getLocalizedName(templateKey, mObj.rawData);
+            }
+            // TRADUCTION DES BOUTONS L/R LORS DU CHANGEMENT DE LANGUE
+            if (mObj.roundBtn && mObj.sideKey) {
+                mObj.roundBtn.textContent = mObj.sideKey === 'LEFT' ? this.t('leftShort') : this.t('rightShort');
             }
         });
 
@@ -631,7 +640,7 @@ class MeasurementViewer {
         const lblR = this.t('rightShort');
         this.sideToggleStates = [
             { text: this.t('defaultFilter'), filter: 'DEFAULT' },
-            { text: `${lblL} / ${lblR}`, filter: 'ALL' },
+            { text: this.t('filterAll'), filter: 'ALL' },
             { text: this.t('leftOnly'), filter: 'LEFT' },
             { text: this.t('rightOnly'), filter: 'RIGHT' }
         ];
@@ -731,7 +740,10 @@ class MeasurementViewer {
         const data = await modelRes.json();
         
         for (const [name, measData] of Object.entries(data.measurements_results)) {
-            const tpl = this.templateMap.get(name);
+            // CORRECTION DU BUG DE TRADUCTION G/D :
+            // measData.pair_group contient toujours l'ID original (ex: "Tour de manche")
+            const templateKey = measData.pair_group || name;
+            const tpl = this.templateMap.get(templateKey);
             if (tpl) {
                 measData.name = tpl.name;
                 measData.description = tpl.description;
@@ -822,14 +834,13 @@ class MeasurementViewer {
         }
 
         const anchorObj = new THREE.Object3D();
-        // L'ancrage reste toujours strict sur le point d'index 0 tel que fourni par le JSON/Python
         anchorObj.position.copy(points[0]);
 
         const iconGroup = new THREE.Group();
         let currentX = 0.0;
         
         const addSprite = (sprite, width) => {
-            sprite.position.set(currentX + width / 2, -0.01, -0.0125); 
+            sprite.position.set(currentX + width / 2, -0.05, 0); 
             iconGroup.add(sprite);
             currentX += width + 0.01;
         };
@@ -861,13 +872,13 @@ class MeasurementViewer {
         const ctx = canvas.getContext('2d');
 
         if (type === 'info') {
-            ctx.fillStyle = '#333333';
+            ctx.fillStyle = '#282828';
             ctx.beginPath(); ctx.arc(64, 64, 56, 0, 2 * Math.PI); ctx.fill();
-            ctx.lineWidth = 6; ctx.strokeStyle = '#ffd700'; ctx.stroke();
-            ctx.fillStyle = '#ffd700'; ctx.font = 'bold 70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.lineWidth = 6; ctx.strokeStyle = '#ff9900'; ctx.stroke();
+            ctx.fillStyle = '#ff9900'; ctx.font = 'bold 70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('i', 64, 66);
         } else if (type === 'grid') {
-            ctx.fillStyle = '#333333';
+            ctx.fillStyle = '#282828';
             ctx.beginPath(); 
             if (ctx.roundRect) ctx.roundRect(8, 16, 240, 96, 20); else ctx.rect(8, 16, 240, 96);
             ctx.fill();
@@ -875,7 +886,7 @@ class MeasurementViewer {
             ctx.fillStyle = '#4ea8de'; ctx.font = 'bold 46px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('EDIT', 128, 66);
         } else if (type === 'text') {
-            ctx.fillStyle = 'rgba(22, 24, 28, 0.9)';
+            ctx.fillStyle = 'rgba(40, 40, 40, 0.9)';
             ctx.beginPath();
             if (ctx.roundRect) ctx.roundRect(10, 25, 236, 78, 16); else ctx.rect(10, 25, 236, 78);
             ctx.fill();
@@ -885,6 +896,7 @@ class MeasurementViewer {
         }
 
         const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, transparent: true, opacity: 0.95 }));
         
         if (type === 'text') sprite.scale.set(0.120, 0.060, 0.060);
@@ -974,7 +986,7 @@ class MeasurementViewer {
         div.innerHTML = `
             <div class="leg-col-name">
                 <span class="legend-name">${displayName}</span>
-                ${descText ? `<span class="info-icon" style="color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:14px; height:14px; font-size:10px; font-weight:bold; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" title="${this.t('infoAvailable')}">i</span>` : ''}
+                ${descText ? `<span class="info-icon" style="color:#ff9900; border:1px solid #ff9900; border-radius:50%; width:14px; height:14px; font-size:10px; font-weight:bold; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;" title="${this.t('infoAvailable')}">i</span>` : ''}
                 ${hasGrid ? `<span style="background:rgba(78,168,222,0.15); color:#4ea8de; padding:1px 4px; border-radius:3px; font-size:9px; font-weight:bold; border:1px solid #4ea8de; flex-shrink:0;">EDIT</span>` : ''}
             </div>
             <div class="leg-col-lr lr-inline-container"></div>
@@ -1033,9 +1045,12 @@ class MeasurementViewer {
             const mObj = builtItems[key];
             if (!mObj) return;
 
+            // SAUVEGARDE DE LA CLÉ DE CÔTÉ POUR LA TRADUCTION DYNAMIQUE
+            mObj.sideKey = key;
+
             const roundBtn = document.createElement('button');
             roundBtn.className = `lr-round-btn ${mObj.isChecked ? 'checked' : ''}`;
-            roundBtn.textContent = key === 'LEFT' ? 'L' : 'R';
+            roundBtn.textContent = key === 'LEFT' ? this.t('leftShort') : this.t('rightShort');
             sidesContainer.appendChild(roundBtn);
 
             mObj.domElement = div; mObj.nameSpan = div.querySelector('.legend-name'); mObj.roundBtn = roundBtn; mObj.hudTargetElement = roundBtn;
@@ -1083,6 +1098,7 @@ class MeasurementViewer {
             this.descSection.style.display = 'block';
             const titleEl = this.descSection.querySelector('#desc-panel-title');
             if (titleEl) {
+                // UTILISATION CORRECTE DE pair_group POUR LA TRADUCTION
                 titleEl.textContent = this.getLocalizedName(targetObj.groupKey || targetObj.id, targetObj.rawData);
             }
             const contentEl = this.descSection.querySelector('#desc-panel-content');

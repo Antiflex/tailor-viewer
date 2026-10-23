@@ -85,7 +85,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 8px 14px;
-            font-size: 15px; /* Agrandissement demandé */
+            font-size: 15px;
             font-weight: 600;
             color: #fff;
             backdrop-filter: blur(8px);
@@ -128,7 +128,7 @@
                 opacity: 0;
                 pointer-events: none;
                 transform: scale(0.95) translateY(-10px);
-                animation: none; /* Remet à zéro l'animation initiale */
+                animation: none;
             }
 
         .help-item {
@@ -195,7 +195,7 @@
             cursor: pointer;
             padding: 0 10px;
             margin-bottom: 4px;
-            height: 34px; /* Raccourci (avant: 44px) */
+            height: 34px;
             box-sizing: border-box;
             transition: background 0.2s;
         }
@@ -571,7 +571,8 @@
         <div class="help-item"><span class="help-icon">📏</span> <span data-i18n="helpSelect">Clic sur légende : Sélectionner la mesure</span></div>
         <hr style="border:0; height:1px; background:rgba(255,255,255,0.1); margin:10px 0;">
         <div class="help-item">
-            <span class="help-icon" style="color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:bold; line-height:16px;">i</span>
+            <!-- COULEUR ORANGE ICI -->
+            <span class="help-icon" style="color:#ff9900; border:1px solid #ff9900; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:bold; line-height:16px;">i</span>
             <span data-i18n="helpInfo">Information additionnelle disponible</span>
         </div>
         <div class="help-item">
