@@ -549,12 +549,14 @@
     {
       "id": "Tour de poitrine",
       "name": {
-        "fr": "Chest girth",
+        "fr": "Tour de poitrine",
+        "en": "Chest girth",
         "es": "Contorno de pecho",
         "de": "Brustumfang"
       },
       "description": {
         "fr": "",
+        "en": "",
         "es": "",
         "de": ""
       },
@@ -752,11 +754,11 @@
         "aggregation_mode": "min_perim",
         "angle_aggregation_mode": "min_perim",
         "num_slices": 15,
-        "agg_theta_tol_deg": 10.0,
-        "agg_phi_tol_deg": 4.0,
+        "agg_theta_tol_deg": 0.0,
+        "agg_phi_tol_deg": 50.0,
         "theta_tol_deg": 6.0,
         "phi_tol_deg": 6.0,
-        "num_theta": 5,
+        "num_theta": 10,
         "num_phi": 5,
         "hull_on_aggregation": true,
         "hull_on_measure": true,
